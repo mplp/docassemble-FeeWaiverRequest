@@ -1,6 +1,7 @@
 ---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
+  #- myfeedback.yml
 ---
 metadata:
   title: >-
@@ -26,7 +27,7 @@ metadata:
 ---
 default screen parts:
   footer: |
-    [:comment-dots: Feedback](${ feedback_link(user_info(), i="docassemble.FeeWaiverRequest:myfeedback.yml") } ){:target="_blank"}
+    [:comment-dots: Feedback](${ feedback_link(user_info(), i="myfeedback.yml") } ){:target="_blank"}
 
 ---
 code: |

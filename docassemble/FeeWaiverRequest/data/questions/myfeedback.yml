@@ -1,10 +1,13 @@
 ---
 modules:
-  - .github_issue
-  - .feedback_on_server
+  - docassemble.GithubFeedbackForm.github_issue
+  - docassemble.GithubFeedbackForm.feedback_on_server
+#  - .github_issue
+#  - .feedback_on_server
 ---
 include:
   - docassemble.ALToolbox:collapse_template.yml
+  #- docassemble.GithubFeedbackForm:feedback.yml
 ---
 metadata:
   title: User Feedback
@@ -147,11 +150,11 @@ if: |
   get_config('debug')
 id: intro
 question: |
-  Tester feedback form
+  Tester feedback formmmm
 decoration: opinion
 subquestion: |
   This form is designed to be used by testers and community
-  stakeholders.
+  stakeholders....
   
   The information you type here will be publicly available. That means anyone
   will be able to see it.
