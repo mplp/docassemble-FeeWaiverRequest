@@ -1,0 +1,671 @@
+include:
+  - docassemble.mlhframework:mlh_interview_framework.yml
+
+---
+modules:
+  - .mlh_general
+
+---
+# docassemble-level metadata
+# See https://docassemble.org/docs/initial.html
+metadata:
+  title: Do-It-Yourself Fee Waiver Request
+  short title: Fee Waiver Request
+  description: |-
+    This interview helps someone in Michigan complete the forms to apply to waive fees and costs.
+  tags: []
+  authors:
+    - Brett Harrison of Maverick & Mitchell LLC
+  original_form:
+    - https://www.courts.michigan.gov/4a5cdb/siteassets/forms/scao-approved/mc20.pdf
+  help_page_url: https://michiganlegalhelp.org/resources/going-court/fee-waivers-court-cases
+  help_page_title: Fee Waivers in Court Cases
+  allowed_courts: []
+  typical_role: "unknown"
+  al_weaver_version: "1.10.2"
+  generated_on: "2023-09-20"
+
+
+---
+id: interview config code block
+initial: True
+code: |
+  github_repo_name =  'docassemble-FeeWaiverRequest'
+  # al_form_type = "existing_case" 
+  MLH_instructions_included = True
+  MLH_court_forms = True
+  MLH_esign_supported = True
+  MLH_case_type_language = 'Look for the two-letter case type code at the end of your case number. If you are filing a new case and do not know the case type code yet, you can find it in this ${ MLH_CASE_TYPE_CODE_LIST }. Also look at the column labeled **Type of Filing**. If this column only says **Subsequent Filings** for your court and you need to file papers to start a case, then you cannot e-file your *Fee Waiver Request*. If you are allowed to e-file your initial papers, this column will say **Case Initiation**. If you need to file a *Fee Waiver Request* with a post-judgment motion, it will be considered a subsequent filing.'
+  MLH_form_type = "form"
+  MLH_time_min = 5
+  MLH_time_max = 15
+
+---
+objects:
+  - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - other_parties: ALPeopleList.using(ask_number=True, target_number=1)
+  - plaintiff_attorney: MLHAttorney
+
+---
+sections:
+  - section_intro: Introduction
+  - section_info: Basic Information
+  - section_affidavit: Affidavit Information
+  - section_final: Final Instructions
+
+# # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
+---
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_fee_waiver_request
+mandatory: True
+code: |
+  # Set the allowed courts for this interview
+  allowed_courts = []
+  nav.set_section("section_intro")
+  #MLH_standard_intro_pages
+  nav.set_section("section_info")
+
+  court_type_selection
+  if court_type == 'circuit':
+    case_type
+  elif court_type == 'district':
+    case_type = 'Parties'
+  elif court_type == 'probate':
+    case_type = 'Matter'
+
+  if case_type == 'Parties':
+    user_ask_role
+    plaintiffs.gather()
+    #plaintiffs[0].address.address
+    #plaintiffs[0].phone_number
+    if users[0].has_attorney:
+      plaintiff_attorney.phone_number
+      plaintiff_attorney.bar_number
+      #plaintiff_attorney.name.first
+      #plaintiff_attorney.phone_number
+      #plaintiff_attorney.address.address
+      #plaintiff_attorney_bar_number
+    set_progress(16)
+    defendants.gather()
+    defendants[0].address.address
+    defendants[0].phone_number
+    if defendants[0].has_attorney:
+      defendants_attorney_name
+  elif case_type == 'Matter':
+    in_the_matter_of
+
+  docket_number
+  court_county_selection
+  if court_count > 1:
+    court_index
+  else:
+    # This means there is only one court of this type for this county.
+    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  court_info_display
+
+
+  set_progress(32)
+  nav.set_section("section_affidavit")
+  public_assistance_received
+  legal_service_representation
+  set_progress(48)
+  household_income
+  household_size
+  assets_list
+  obligations_list
+  set_progress(64)
+  nav.set_section("section_final")
+  signature_date
+  interview_order_fee_waiver_request = True
+---
+
+
+
+###################### Main order ######################
+---
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: False
+code: |
+  al_intro_screen
+  #fee_waiver_request__mc_20_intro
+  interview_order_fee_waiver_request
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+      persistent=True,
+      data={
+          "zip": showifdef("users[0].address.zip"),
+          "reached_interview_end": True,
+      },
+  )
+  fee_waiver_request__mc_20_download
+
+---
+# Overrides standard landing page
+id: MLH intro landing
+continue button field: MLH_intro_landing
+question: |
+  Welcome to ${ AL_ORGANIZATION_TITLE }’s ${ MLH_interview_short_title } tool.
+subquestion: |
+  This tool will help you prepare a *Fee Waiver Request*. When you are finished, return to the [Michigan Legal Help website](http://michiganlegalhelp.org) for information on what to do next. File this form in the court where your case will be or is pending.
+
+---
+id: Case type
+question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
+subquestion: |
+  Some cases do not have two parties, such as name change cases or adoption cases.
+fields:
+  - no label: case_type
+    input type: radio
+    choices:
+      - Yes: Parties
+      - No: Matter
+---
+reconsider: True
+code: |
+  if case_type == "Parties":
+    other_parties.there_are_any = True
+  else:
+    other_parties.there_are_any = False
+
+---
+id: Your role
+question: |
+  Are you the plaintiff/petitioner or the defendant/respondent in the court case?
+subquestion:
+fields:
+  - no label: user_role
+    input type: radio
+    choices:
+      - Plaintiff/Petitioner: P
+      - Defendant/Respondent: R
+
+---
+id: Court Information
+question: Court Information
+fields:
+  - "Judge": trial_court_judge
+    maxlength: 29
+
+---
+id: Public Assistance
+question: |
+  Public Assistance
+fields:
+  - "Public assistance received": public_assistance_received
+    datatype: yesno
+  - "Food Assistance Program through the state of Michigan (FAP or SNAP)": pa_food_assistance_program
+    datatype: yesno
+  - "Medicaid (including Healthy Michigan, CHIP, and ESO)": pa_medicaid
+    datatype: yesno
+  - "Family Independence Program through the state of Michigan (FIP or TANF)": pa_family_independence_program
+    datatype: yesno
+  - "Women, Infants, and Children (WIC)": pa_women_infants_children
+    datatype: yesno
+  - "Supplemental Security Income (SSI)": pa_supplemental_security
+    datatype: yesno
+  - "Other means-tested public assistance": pa_other
+    datatype: yesno
+  - "Other public assistance received": pa_other_list
+    maxlength: 54
+  - "Public assistance case numbers": pa_case_numbers
+    maxlength: 49
+  - "State Disability Assistance (SDA)": pa_state_disability
+    datatype: yesno
+  - "State Emergency Relief (SER)": pa_state_emergency_relief
+    datatype: yesno
+  - "What is your MDHHS case number?": pa_mdhhs_case_number
+  - "Other public assistance case numbers": pa_other_case_numbers
+---
+id: Legal Assistance
+question: |
+  Legal Assistance?
+fields:
+  - "Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?": legal_service_representation
+    datatype: yesno
+  - "What is the name of the legal service provider or law school clinic?": legal_service_provider
+    maxlength: 84
+---
+id: Your Income
+question: |
+  Your Income
+fields:
+  - "Gross household income": household_income
+    maxlength: 16
+  - "Per": household_income_period
+    maxlength: 39
+  - "Are you employed?": income_employment
+    datatype: yesno
+  - "Do you receive unemployment benefits?": income_unemployment
+    datatype: yesno
+---
+id: Household Information
+question: |
+  Household Information
+fields:
+  - "Household size": household_size
+    maxlength: 8
+  - "Household income sources": household_income_sources
+    maxlength: 67
+---
+id: Assets
+question: |
+  Assets
+fields:
+  - "Assets list": assets_list
+    input type: area
+---
+id: Obligations
+question: |
+  Obligations
+fields:
+  - "Obligations list": obligations_list
+    input type: area
+---
+id: Screen 12
+question: |
+  Screen 12
+fields:
+  - "In the matter of": in_the_matter_of
+    maxlength: 76
+  - "Unable to pay": unable_to_pay
+    datatype: yesno
+---
+id: preview fee_waiver_request__mc_20
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_court_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab. Click the "Edit answers" button
+  to edit your answers.
+
+  ${ action_button_html(url_action('review_fee_waiver_request__mc_20'), label='Edit answers', color='info') }
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: fee_waiver_request__mc_20_preview_question    
+---
+code: |
+  signature_fields = ['users[0].signature']
+---
+code: |
+  # This is a placeholder for the addresses that will be searched
+  # for matching address to court. Edit if court venue is based on 
+  # a different address than the user's
+  [user.address.address for user in users.complete_elements()]
+  addresses_to_search = [user.address for user in users.complete_elements()]
+
+
+---
+id: download fee_waiver_request__mc_20
+event: fee_waiver_request__mc_20_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_fee_waiver_request__mc_20'), label='Edit answers', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+
+
+
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - fee_waiver_request__mc_20_Post_interview_instructions: ALDocument.using(title="Instructions", filename="fee_waiver_request__mc_20_next_steps.docx", enabled=True, has_addendum=False)
+  - fee_waiver_request__mc_20_attachment: ALDocument.using(title="Fee Waiver Request", filename="fee_waiver_request__mc_20", enabled=True, has_addendum=True, default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[fee_waiver_request__mc_20_Post_interview_instructions, fee_waiver_request__mc_20_attachment], filename="fee_waiver_request__mc_20", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[fee_waiver_request__mc_20_attachment],  filename="fee_waiver_request__mc_20", title="All forms to deliver to court", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: fee_waiver_request_next_steps
+  docx template file: fee_waiver_request_next_steps.docx
+  variable name: fee_waiver_request__mc_20_Post_interview_instructions[i]
+  skip undefined: True
+  tagged pdf: True
+---
+attachment:
+  name: fee waiver request mc 20
+  filename: fee_waiver_request_mc_20
+  variable name: fee_waiver_request__mc_20_attachment[i]
+  skip undefined: True
+  pdf template file: fee_waiver_request_mc_20.pdf
+  fields:
+      - "trial_court_circuit": ${ trial_court_circuit }
+      - "docket_number": ${ docket_number }
+      - "docket_number": ${ docket_number }
+      - "trial_court_district": ${ trial_court_district }
+      - "trial_court_judge": ${ trial_court_judge }
+      - "trial_court_county": ${ trial_court.address.county }
+      - "trial_court_phone_number": ${ trial_court.phone_number }
+      - "trial_court_address_on_one_line": ${ trial_court.address.on_one_line() }
+      - "plaintiffs_name": ${ plaintiffs[0] }
+      - "defendants_name": ${ defendants[0] }
+      - "plaintiffs_address_block": ${ plaintiffs[0].address.block() }
+      - "defendants_address_block": ${ defendants[0].address.block() }
+      - "plaintiffs_phone_number": ${ plaintiffs[0].phone_number }
+      - "defendants_phone_number": ${ defendants[0].phone_number }
+      - "plaintiffs_attorney_name": ${ plaintiffs_attorney_name }
+      - "plaintiffs_attorney_bar_number": ${ plaintiffs_attorney_bar_number }
+      - "defendants_attorney_name": ${ defendants_attorney_name }
+      - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
+      - "plaintiffs_attorney_address_block": ${ plaintiffs_attorney_address_block }
+      - "defendants_attorney_address_block": ${ defendants_attorney_address_block }
+      - "plaintiffs_attorney_phone_number": ${ plaintiffs_attorney_phone_number }
+      - "defendants_attorney_phone_number": ${ defendants_attorney_phone_number }
+      - "in_the_matter_of": ${ in_the_matter_of }
+      - "public_assistance_received": ${ public_assistance_received }
+      - "pa_food_assistance_program": ${ pa_food_assistance_program }
+      - "pa_medicaid": ${ pa_medicaid }
+      - "pa_family_independence_program": ${ pa_family_independence_program }
+      - "pa_women_infants_children": ${ pa_women_infants_children }
+      - "pa_supplemental_security": ${ pa_supplemental_security }
+      - "pa_other": ${ pa_other }
+      - "pa_other_list": ${ pa_other_list }
+      - "pa_case_numbers": ${ pa_case_numbers }
+      - "legal_service_representation": ${ legal_service_representation }
+      - "legal_service_provider": ${ legal_service_provider }
+      - "unable_to_pay": ${ unable_to_pay }
+      - "household_income": ${ household_income }
+      - "household_income_period": ${ household_income_period }
+      - "household_size": ${ household_size }
+      - "household_income_sources": ${ household_income_sources }
+      - "assets_list": ${ fee_waiver_request__mc_20_attachment.safe_value("assets_list") }
+      - "obligations_list": ${ fee_waiver_request__mc_20_attachment.safe_value("obligations_list") }
+      - "signature_date": ${ signature_date }
+      - "users_signature": ${ users[0].signature }
+---
+code: |
+  fee_waiver_request__mc_20_attachment.overflow_fields["assets_list"].overflow_trigger = 170
+  fee_waiver_request__mc_20_attachment.overflow_fields["assets_list"].label = "Assets list"
+  fee_waiver_request__mc_20_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
+  fee_waiver_request__mc_20_attachment.overflow_fields["obligations_list"].label = "Obligations list"
+  fee_waiver_request__mc_20_attachment.overflow_fields.gathered = True
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+### Stuff to move to framework???
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+---
+id: Court county choice
+mandatory: False
+question: |
+  Hello! (to delete)
+  
+  % if al_form_type == 'starts_case':
+  What county do you want to file in?
+  % elif al_form_type == 'appeal':
+  What is the county of the trial court your case was originally filed in?
+  % else:
+  Please choose the county of the court where your case is.
+  % endif
+subquestion: |
+  % if al_form_type != 'starts_case':
+  ${ collapse_template(help_user_choose_court_template) }
+  % endif
+fields:
+  - County: county_choice
+    code: court_list._load_courts()["address_county"].unique()
+continue button field: court_county_selection
+
+---
+id: Court type choice
+mandatory: False
+question: |
+  Hey! (to delete)
+    
+  % if al_form_type == 'starts_case':
+  What court is this case in?
+  % elif al_form_type == 'appeal':
+  What court your case was originally filed in?
+  % else:
+  Please choose type of court where your case is.
+  % endif
+subquestion: |
+  % if al_form_type != 'starts_case':
+  ${ collapse_template(court_type_selection_template) }
+  % endif
+fields:
+  - Court: court_type
+    choices:
+      - Circuit: circuit
+      - District: district
+      - Probate: probate
+continue button field: court_type_selection
+
+---
+template: court_type_selection_template
+subject: |
+  What is this?
+content: |
+  A civil case is filed because of a disagreement between two people, businesses, or organizations. The disagreement usually involves one person believing that he or she has been hurt, had rights violated, or had property damaged by another person. A civil case is not a criminal case.
+
+  **District Court** is where general civil cases are heard if the amount of money in dispute is less than or equal to $25,000.
+
+  **Circuit Court** is where general civil cases are heard if the amount in dispute is more than $25,000.
+
+  **Probate Court** handles things like wills and estate administration, guardianships and conservatorships, adoptions, and registering foreign birth certificates.
+
+  The title of a probate case is often "In the matter of…"
+
+---
+mandatory: False
+question: |
+  Oh hi!
+  % if al_form_type == 'starts_case':
+  What court do you want to file in?
+  % elif al_form_type == 'appeal':
+  What trial court was your case originally filed in?
+  % else:
+  Please choose the court where your case is.
+  % endif
+subquestion: |
+  % if al_form_type != 'starts_case':
+  ${ collapse_template(help_user_choose_court_template) }
+  % endif
+fields:
+  - Court 1: court_index
+    code: court_list.filter_courts_by_2([county_choice], ['district', 'circuit', 'probate'], column_1='address_county', column_2='type')
+    
+---
+question: Which ${ capitalize(court_type) } Court in ${ county_choice } County is this case in?
+subquestion: |
+  Select a court below.
+fields:
+  - County Courts: court_index
+    code: court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')
+
+---
+code: |
+  court_count = len(list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')))
+  
+---
+mandatory: False
+question: |
+  Display court info
+subquestion: |
+  court_index: ${ court_index }
+
+  ${ the_court } - ${ county_choice } County
+
+  ${ the_court.address.block(bare=True) }
+  
+  ${ the_court.phone } 
+continue button field: court_info_display
+
+
+
+
+
+###########################################
+---
+sets:
+  - users[i].attorney.name.first
+  - users[i].attorney.name.last
+  - users[i].attorney.name.middle
+  - users[i].attorney.name.suffix
+id: User attorney info
+question: |
+  What is the lawyer’s name and bar number?
+fields:
+  - code: |
+      users[i].attorney.name_fields()
+
+---
+template: help_user_find_bar_number_template
+subject: |
+  How can I find a lawyer's bar number?
+content: |
+  The lawyer's bar number is a five digit number after the letter P, usually listed after the lawyer's name. For example: P12345.  
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # #  MOVE to framework
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
+
+# to override default address labels in ql_baseline.yml
+---
+generic object: ALAddress
+template: x.address_label
+content: |
+  Street Address or P.O. Box
+---
+generic object: ALAddress
+template: x.unit_label
+content: |
+  Apartment, suite, etc
+---
+generic object: ALAddress
+template: x.zip_label
+content: |
+  Zip Code
+
+
+---
+sets:
+  - users[i].name.has_attorney
+id: users attorney
+question: |
+  Do you have a lawyer?
+subquestion: |
+fields:
+  - no label: users[i].has_attorney
+    input type: radio
+    choices:
+      - Yes: True
+      - No: False
+---
+sets:
+  - x.has_attorney
+id: persons attorney
+generic object: ALIndividual
+question: |
+  Does ${ x } have a lawyer?
+subquestion: |
+fields:
+  - no label: x.has_attorney
+    input type: radio
+    choices:
+      - Yes: True
+      - No: False
+
+---
+sets:
+  - plaintiff_attorney.bar_number
+id: Your Attorney Bar
+question: |
+  Your Attorney Bar #
+subquestion: |
+  ${ collapse_template(help_user_find_bar_number_template) }
+fields:
+  - "Plaintiffs attorney bar number": plaintiff_attorney.bar_number
+    maxlength: 7
+
+---
+id: Your Attorney
+question: |
+  Your Attorney
+subquestion: |
+  ${ collapse_template(help_user_find_bar_number_template) }
+fields:
+  - "Plaintiffs attorney name": plaintiffs_attorney_name
+    maxlength: 30
+  - "Plaintiffs attorney bar number": plaintiff_attorney_bar_number
+    maxlength: 7
+  - "Plaintiffs attorney address block": plaintiffs_attorney_address_block
+    maxlength: 84
+  - "Plaintiffs attorney phone number": plaintiffs_attorney_phone_number
+    maxlength: 42
+---
+id: Opponent s Attorney
+question: |
+  Opponent's Attorney
+fields:
+  - "Defendants attorney name": defendants_attorney_name
+    maxlength: 31
+  - "Defendants attorney bar number": defendants_attorney_bar_number
+    maxlength: 11
+  - "Defendants attorney address block": defendants_attorney_address_block
+    maxlength: 84
+  - "Defendants attorney phone number": defendants_attorney_phone_number
+    maxlength: 42
+
+
+
+---
+sets:
+  - x.address.address
+  - x.address.city
+  - x.address.zip
+  - x.address.unit
+  - x.address.state
+  - x.address.country
+  - x.phone_number
+id: persons address and phone
+generic object: ALIndividual
+question: |
+  What is ${ x.possessive('address') } and phone number???
+fields:
+  - code: |
+      x.address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)
+  - Phone number: x.phone_number
+    required: False

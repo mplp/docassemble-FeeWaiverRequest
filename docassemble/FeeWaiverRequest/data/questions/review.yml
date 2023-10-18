@@ -1,0 +1,266 @@
+---
+id: fee waiver request mc 20 review screen
+event: review_fee_waiver_request__mc_20
+question: |
+  Review your answers
+review:
+  - Edit: trial_court_circuit
+    button: |
+      **Circuit**:
+      ${ trial_court_circuit }
+  - Edit: docket_number
+    button: |
+      **Docket number**:
+      ${ docket_number }
+  - Edit: trial_court_district
+    button: |
+      **District**:
+      ${ trial_court_district }
+  - Edit: trial_court_judge
+    button: |
+      **Judge**:
+      ${ trial_court_judge }
+  - Edit: trial_court
+    button: |
+      **Trial court**
+  
+      % if defined("trial_court.address.address"):
+      * address: ${ trial_court.address.block() }
+      % endif
+      % if defined("trial_court.phone_number"):
+      * phone_number: ${ trial_court.phone_number }
+      % endif
+  - Edit: plaintiffs.revisit
+    button: |
+      **Plaintiffs**
+
+      % for item in plaintiffs:
+        * ${ item }
+      % endfor
+  - Edit: defendants.revisit
+    button: |
+      **Defendants**
+
+      % for item in defendants:
+        * ${ item }
+      % endfor
+  - Edit: plaintiffs_attorney_name
+    button: |
+      **Plaintiffs attorney name**:
+      ${ plaintiffs_attorney_name }
+  - Edit: plaintiffs_attorney_bar_number
+    button: |
+      **Plaintiffs attorney bar number**:
+      ${ plaintiffs_attorney_bar_number }
+  - Edit: defendants_attorney_name
+    button: |
+      **Defendants attorney name**:
+      ${ defendants_attorney_name }
+  - Edit: defendants_attorney_bar_number
+    button: |
+      **Defendants attorney bar number**:
+      ${ defendants_attorney_bar_number }
+  - Edit: plaintiffs_attorney_address_block
+    button: |
+      **Plaintiffs attorney address block**:
+      ${ plaintiffs_attorney_address_block }
+  - Edit: defendants_attorney_address_block
+    button: |
+      **Defendants attorney address block**:
+      ${ defendants_attorney_address_block }
+  - Edit: plaintiffs_attorney_phone_number
+    button: |
+      **Plaintiffs attorney phone number**:
+      ${ plaintiffs_attorney_phone_number }
+  - Edit: defendants_attorney_phone_number
+    button: |
+      **Defendants attorney phone number**:
+      ${ defendants_attorney_phone_number }
+  - Edit: in_the_matter_of
+    button: |
+      **In the matter of**:
+      ${ in_the_matter_of }
+  - Edit: public_assistance_received
+    button: |
+      **Public assistance received**:
+      ${ word(yesno(public_assistance_received)) }
+  - Edit: pa_food_assistance_program
+    button: |
+      **Food Assistance Program through the state of Michigan (FAP or SNAP)**:
+      ${ word(yesno(pa_food_assistance_program)) }
+  - Edit: pa_medicaid
+    button: |
+      **Medicaid (including Healthy Michigan, CHIP, and ESO)**:
+      ${ word(yesno(pa_medicaid)) }
+  - Edit: pa_family_independence_program
+    button: |
+      **Family Independence Program through the state of Michigan (FIP or TANF)**:
+      ${ word(yesno(pa_family_independence_program)) }
+  - Edit: pa_women_infants_children
+    button: |
+      **Women, Infants, and Children (WIC)**:
+      ${ word(yesno(pa_women_infants_children)) }
+  - Edit: pa_supplemental_security
+    button: |
+      **Supplemental Security Income (SSI)**:
+      ${ word(yesno(pa_supplemental_security)) }
+  - Edit: pa_other
+    button: |
+      **Other means-tested public assistance**:
+      ${ word(yesno(pa_other)) }
+  - Edit: pa_other_list
+    button: |
+      **Other public assistance received**:
+      ${ pa_other_list }
+  - Edit: pa_case_numbers
+    button: |
+      **Public assistance case numbers**:
+      ${ pa_case_numbers }
+  - Edit: legal_service_representation
+    button: |
+      **Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**:
+      ${ word(yesno(legal_service_representation)) }
+  - Edit: legal_service_provider
+    button: |
+      **What is the name of the legal service provider or law school clinic?**:
+      ${ legal_service_provider }
+  - Edit: unable_to_pay
+    button: |
+      **Unable to pay**:
+      ${ word(yesno(unable_to_pay)) }
+  - Edit: household_income
+    button: |
+      **Gross household income**:
+      ${ household_income }
+  - Edit: household_income_period
+    button: |
+      **Per**:
+      ${ household_income_period }
+  - Edit: household_size
+    button: |
+      **Household size**:
+      ${ household_size }
+  - Edit: household_income_sources
+    button: |
+      **Household income sources**:
+      ${ household_income_sources }
+  - Edit: assets_list
+    button: |
+      **Assets list**:
+      > ${ single_paragraph(assets_list) }
+  - Edit: obligations_list
+    button: |
+      **Obligations list**:
+      > ${ single_paragraph(obligations_list) }
+  - Edit: signature_date
+    button: |
+      **Date of signature**:
+      ${ signature_date }
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
+  - Edit: income_employment
+    button: |
+      **Are you employed?**:
+      ${ word(yesno(income_employment)) }
+  - Edit: income_unemployment
+    button: |
+      **Do you receive unemployment benefits?**:
+      ${ word(yesno(income_unemployment)) }
+  - Edit: pa_state_disability
+    button: |
+      **State Disability Assistance (SDA)**:
+      ${ word(yesno(pa_state_disability)) }
+  - Edit: pa_state_emergency_relief
+    button: |
+      **State Emergency Relief (SER)**:
+      ${ word(yesno(pa_state_emergency_relief)) }
+  - Edit: pa_mdhhs_case_number
+    button: |
+      **What is your MDHHS case number?**:
+      ${ pa_mdhhs_case_number }
+  - Edit: pa_other_case_numbers
+    button: |
+      **Other public assistance case numbers**:
+      ${ pa_other_case_numbers }
+  - Edit: court_type
+    button: |
+      **Court Type**:
+      ${ court_type }
+  - Edit: case_type
+    button: |
+      **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**:
+      ${ case_type }
+  - Edit: user_ask_role
+    button: |
+      **Are you the plaintiff/petitioner or the defendant/respondent in the court case?**:
+      ${ user_ask_role }
+---
+continue button field: plaintiffs.revisit
+question: |
+  Edit plaintiffs
+subquestion: |
+  ${ plaintiffs.table }
+
+  ${ plaintiffs.add_action() }
+---
+table: plaintiffs.table
+rows: plaintiffs
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - address.address
+  - phone_number
+confirm: True
+
+---
+continue button field: defendants.revisit
+question: |
+  Edit defendants
+subquestion: |
+  ${ defendants.table }
+
+  ${ defendants.add_action() }
+---
+table: defendants.table
+rows: defendants
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - address.address
+  - phone_number
+confirm: True
+
+---
+continue button field: users.revisit
+question: |
+  Edit users
+subquestion: |
+  ${ users.table }
+
+  ${ users.add_action() }
+---
+table: users.table
+rows: users
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit:
+  - signature
+confirm: True
