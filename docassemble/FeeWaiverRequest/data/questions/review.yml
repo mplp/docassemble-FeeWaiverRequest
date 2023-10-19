@@ -1,6 +1,6 @@
 ---
-id: fee waiver request mc 20 review screen
-event: review_fee_waiver_request__mc_20
+id: fee waiver request review screen
+event: review_fee_waiver_request
 question: |
   Review your answers
 review:
