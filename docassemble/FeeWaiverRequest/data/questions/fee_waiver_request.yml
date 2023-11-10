@@ -1,10 +1,10 @@
 include:
-  - docassemble.mlhframework:mlh_interview_framework.yml
+  - docassemble.mlhframework:mlh_interview_framework.yml  # TODO - remove BH
   - review.yml
-
+  - docassemble.ALToolbox:al_income.yml
 ---
 modules:
-  - .mlh_general
+  - .fee_waiver_request
 
 ---
 # docassemble-level metadata
@@ -26,7 +26,6 @@ metadata:
   al_weaver_version: "1.10.2"
   generated_on: "2023-09-20"
 
-
 ---
 id: interview config code block
 initial: True
@@ -45,7 +44,12 @@ code: |
 objects:
   - users: ALPeopleList.using(ask_number=True,target_number=1)
   - other_parties: ALPeopleList.using(ask_number=True, target_number=1)
-  - plaintiff_attorney: MLHAttorney
+  - plaintiff_attorneys: ALPeopleList.using(ask_number=True, target_number=1)
+  - defendant_attorneys: ALPeopleList.using(ask_number=True, target_number=1)
+  - user_vehicles: ALVehicleList.using(complete_attribute='year', ask_number=True)
+  - user_assets: ALSimpleValueList
+  - user_court_payments: ALSimpleValueList
+  - user_monthly_payments: ALSimpleValueList
 
 ---
 sections:
@@ -54,20 +58,76 @@ sections:
   - section_affidavit: Affidavit Information
   - section_final: Final Instructions
 
+
+
+---
+code: |
+  assets_list = 'N/A'
+  if user_vehicles.there_are_any or bank_account_balance > 0 or user_assets.there_are_any:
+    assets_list = ''
+    if user_vehicles.there_are_any:
+      assets_list = 'I have the following ' + user_vehicles.as_noun('vehicle') + ': '
+      for vehicle in user_vehicles.complete_elements():
+        assets_list += f"{ vehicle.year_make_model(separator=' ') }; "
+        if vehicle.balance_owed:
+          assets_list += 'I still owe ' + currency(vehicle.balance) + '. '
+        else:
+          assets_list += 'this vehicle is paid off. '
+    if bank_account_balance > 0:
+      assets_list += f"I have { currency(bank_account_balance) } in my bank account(s). "
+    if user_assets.there_are_any:
+      assets_list += 'I also have the following ' + user_assets.as_noun('asset') + ': '
+      for asset in user_assets.complete_elements():
+        assets_list += f"{ asset.source }, { currency(asset.value) }. "
+
+---
+code: |
+  obligations_list = 'N/A'
+  if expense_rent_amount > 0 or expense_utilities_amount > 0 or expense_child_support or \
+  user_court_payments.there_are_any or user_monthly_payments.there_are_any:
+    obligations_list = ''
+    if expense_rent_amount > 0:
+      obligations_list += f"I pay { currency(expense_rent_amount) } in rent or mortgage each month. "
+    if expense_utilities_amount > 0:
+      obligations_list += f"I pay { currency(expense_utilities_amount) } in utilities each month. "
+    if expense_child_support:
+      obligations_list += f"I pay { currency(expense_child_support_amount) } for court-ordered child support each month. "
+    if user_court_payments.there_are_any:
+      obligations_list += 'Other monthly court-ordered payments: '
+      obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
+      for payment in user_court_payments.complete_elements()]) + '. '
+    if user_monthly_payments.there_are_any:
+      obligations_list += 'Other monthly payments: '
+      obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
+      for payment in user_monthly_payments.complete_elements()]) + '. '
+
+---
+question: Summary
+subquestion: |
+  Assets: ${ assets_list }
+  
+  Obligations: ${ obligations_list }
+continue button field: show_summary
+
+
+
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 ---
-comment: |
-  Controls order and branching logic for questions specific to this form
 id: interview order fee waiver request
 mandatory: False
 code: |
+
   # Set the allowed courts for this interview
   allowed_courts = []
-  nav.set_section("section_intro")
-  #MLH_standard_intro_pages
   nav.set_section("section_info")
+
+  users[0].name.first
+
+  court_type = 'circuit'
+  case_type = 'Parties'
+  user_ask_role = 'plaintiff'
 
   court_type_selection
   if court_type == 'circuit':
@@ -78,23 +138,25 @@ code: |
     case_type = 'Matter'
 
   if case_type == 'Parties':
-    user_ask_role
-    plaintiffs.gather()
-    #plaintiffs[0].address.address
-    #plaintiffs[0].phone_number
-    if users[0].has_attorney:
-      plaintiff_attorney.phone_number
-      plaintiff_attorney.bar_number
-      #plaintiff_attorney.name.first
-      #plaintiff_attorney.phone_number
-      #plaintiff_attorney.address.address
-      #plaintiff_attorney_bar_number
-    set_progress(16)
-    defendants.gather()
-    defendants[0].address.address
-    defendants[0].phone_number
-    if defendants[0].has_attorney:
-      defendants_attorney_name
+    if user_ask_role == 'plaintiff':
+      plaintiffs.gather()
+      #plaintiffs[0].address.address
+      #plaintiffs[0].phone_number
+      #if users[0].has_attorney:
+        #plaintiff_attorneys[0].bar_number
+        #plaintiff_attorneys[0].address.address
+      defendants.gather()
+      #defendants[0].address.address
+      #defendants[0].phone_number
+    else:
+      defendants.gather()
+      defendants[0].address.address
+      defendants[0].phone_number
+      if users[0].has_attorney:
+        defendant_attorneys[0].name.first
+      plaintiffs.gather()
+      plaintiffs[0].address.address
+      plaintiffs[0].phone_number
   elif case_type == 'Matter':
     in_the_matter_of
 
@@ -105,23 +167,43 @@ code: |
   else:
     # This means there is only one court of this type for this county.
     court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
-  court_info_display
+  #court_info_display
 
   set_progress(32)
   nav.set_section("section_affidavit")
-  public_assistance_received
-  legal_service_representation
-  set_progress(48)
-  household_income
-  household_size
-  assets_list
-  obligations_list
-  set_progress(64)
+
+  # TODO: 
+  if pa_received:
+    if pa_mdhhs:
+      pa_mdhhs_case_number
+    elif pa_other:  
+      pa_other_types
+    elif pa_supplemental_security:
+      pa_ssa_number
+  elif legal_service_representation:
+    legal_service_provider
+  else:
+    indigency_intro
+    household_size
+    household_income
+    income_employment
+    income_unemployment
+    bank_account_balance
+    if user_vehicles.there_are_any:
+      user_vehicles.gather()
+    bank_account_balance
+    if user_assets.there_are_any:
+      assets_intro
+      user_assets.gather()
+    expense_rent_amount
+    expense_child_support
+    if user_court_payments.there_are_any:
+      user_court_payments.gather()
+    if user_monthly_payments.there_are_any:
+      user_monthly_payments.gather()
+
   nav.set_section("section_final")
   interview_order_fee_waiver_request = True
----
-
-
 
 ###################### Main order ######################
 ---
@@ -130,9 +212,10 @@ comment: |
   Delete mandatory: True to include in another interview
 mandatory: True
 code: |
-  #al_intro_screen
+  nav.set_section("section_intro")
+  #MLH_standard_intro_pages
   interview_order_fee_waiver_request
-  #signature_date
+  signature_date
   # Store anonymous data for analytics / statistics
   store_variables_snapshot(
       persistent=True,
@@ -146,14 +229,14 @@ code: |
 ---
 # Overrides standard landing page
 id: MLH intro landing
-continue button field: MLH_intro_landing
+continue button field: MLH_intro_landingg
 question: |
   Welcome to ${ AL_ORGANIZATION_TITLE }’s ${ MLH_interview_short_title } tool.
 subquestion: |
   This tool will help you prepare a *Fee Waiver Request*. When you are finished, return to the [Michigan Legal Help website](http://michiganlegalhelp.org) for information on what to do next. File this form in the court where your case will be or is pending.
 
 ---
-id: Case type
+id: case type
 question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
 subquestion: |
   Some cases do not have two parties, such as name change cases or adoption cases.
@@ -163,6 +246,18 @@ fields:
     choices:
       - Yes: Parties
       - No: Matter
+
+---
+id: user role
+question: |
+  Are you the plaintiff/petitioner or the defendant/respondent in the court case?
+fields:
+  - Your role: user_ask_role
+    input type: radio
+    choices:
+      - Plaintiff/Petitioner: plaintiff
+      - Defendant/Respondent: defendant
+
 ---
 reconsider: True
 code: |
@@ -172,107 +267,467 @@ code: |
     other_parties.there_are_any = False
 
 ---
-id: Your role
-question: |
-  Are you the plaintiff/petitioner or the defendant/respondent in the court case?
-subquestion:
+id: docket number
+question: What is the case number?
+subquestion: |
+  You can find the case number by looking at the top of papers you’ve gotten in the case. 
+  If you haven't filed the case yet, you won't have a case number, so leave this blank.
+  
+  P/P: ${ plaintiffs[0] }
+  
+  D/R: ${ defendants[0] }
 fields:
-  - no label: user_role
-    input type: radio
-    choices:
-      - Plaintiff/Petitioner: P
-      - Defendant/Respondent: R
+  - 'Case #': docket_number
+    required: False
+    maxlength: 20
 
 ---
-id: Court Information
-question: Court Information
+id: matter of
+question: Case Matter
+subquestion: |
+  The top of your petition or other court forms should say "In the matter of ________."
 fields:
-  - "Judge": trial_court_judge
-    maxlength: 29
+  - 'Look at your petition and complete the following: the name of my case is "In the matter of ________."': in_the_matter_of
+    maxlength: 76
+    label above field: True
 
 ---
-id: Public Assistance
-question: |
-  Public Assistance
+id: public assistance received
+question: Public Assistance
+subquestion: |
+  Do you get public assistance that is **based on having low income**?
+  
+  ***Note:** Social Security Disability Insurance benefits (SSDI) are not based on having low income, so if that is the only benefit that you receive, select No.*
+  
+  ${ collapse_template(public_assistance_template) }
 fields:
-  - "Public assistance received": public_assistance_received
-    datatype: yesno
-  - "Food Assistance Program through the state of Michigan (FAP or SNAP)": pa_food_assistance_program
+  - no label: pa_received
+    datatype: yesnoradio
+---
+template: public_assistance_template
+subject: |
+  What are some examples?
+content: |
+  This may include help such as SNAP or food stamps, Medicaid, TANF, WIC, cash assistance, child care assistance, or SSI (Supplemental Security Income).
+  
+  **Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income.
+
+---
+id: public assistance types
+question: |
+  Public Assistance Received
+subquestion: |
+  Which type(s) of public assistance do you receive? *Check all boxes that apply.*
+fields:
+  - "Food Assistance Program through the state of Michigan (also known as FAP or SNAP)": pa_food_assistance_program
     datatype: yesno
   - "Medicaid (including Healthy Michigan, CHIP, and ESO)": pa_medicaid
     datatype: yesno
-  - "Family Independence Program through the state of Michigan (FIP or TANF)": pa_family_independence_program
+  - "Family Independence Program through the state of Michigan (also known as FIP or TANF)": pa_family_independence_program
     datatype: yesno
-  - "Women, Infants, and Children (WIC)": pa_women_infants_children
+  - "Women, Infants, and Children benefits (WIC)": pa_women_infants_children
     datatype: yesno
-  - "Supplemental Security Income (SSI)": pa_supplemental_security
-    datatype: yesno
-  - "Other means-tested public assistance": pa_other
-    datatype: yesno
-  - "Other public assistance received": pa_other_list
-    maxlength: 54
-  - "Public assistance case numbers": pa_case_numbers
-    maxlength: 49
   - "State Disability Assistance (SDA)": pa_state_disability
     datatype: yesno
   - "State Emergency Relief (SER)": pa_state_emergency_relief
     datatype: yesno
-  - "What is your MDHHS case number?": pa_mdhhs_case_number
-  - "Other public assistance case numbers": pa_other_case_numbers
----
-id: Legal Assistance
-question: |
-  Legal Assistance?
-fields:
-  - "Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?": legal_service_representation
+  - "Refugee Assistance Program (RAP)": pa_refugee_assistance
     datatype: yesno
-  - "What is the name of the legal service provider or law school clinic?": legal_service_provider
+  - "Supplemental Security Income through the federal government (SSI)": pa_supplemental_security
+    datatype: yesno
+  - "Other means-tested public assistance": pa_other
+    datatype: yesno
+
+---
+reconsider: True
+code: >-
+  pa_mdhhs = pa_food_assistance_program or pa_medicaid or pa_family_independence_program or 
+  pa_women_infants_children or pa_state_disability or pa_state_emergency_relief or 
+  pa_refugee_assistance
+
+---
+reconsider: True
+code: |
+  # "Other" meaning types of assistance that are not explicitly listed on MC20 Fee Waiver Request
+  pa_other_list = ''
+
+  if pa_received:
+    if pa_state_disability:
+      pa_other_list += 'State Disability Assistance (SDA), '
+    if pa_state_emergency_relief:
+      pa_other_list += 'State Emergency Relief (SER), '
+    if pa_refugee_assistance:
+      pa_other_list += 'Refugee Assistance Program (RAP), '
+    if pa_other:
+      pa_other_list += pa_other_types + ', '
+    pa_other_list = pa_other_list[0:-2]
+---
+reconsider: True
+code: |
+  pa_case_numbers = ''
+
+  if pa_received:
+    pa_case_numbers = 'TODO'
+
+---
+id: MDHHS case number
+question: MDHHS Public Assistance
+subquestion: |
+  Enter your MDHHS case number here.
+  
+  ${ collapse_template (mdhhs_case_number_template) }
+fields:
+  - 'MDHHS Case #': pa_mdhhs_case_number
+---
+template: mdhhs_case_number_template
+subject: How do I find my case number?
+content: |
+  Your MDHHS case number should be on any notices you have gotten from MDHHS regarding your benefits such as food assistance (FAP), cash assistance (FIP), Medicaid, or Women Infants and Children benefits (WIC).
+  
+  If you cannot find any recent notices, [contact your local office](https://www.michigan.gov/mdhhs/inside-mdhhs/county-offices) to ask for your case number. You must enter your case number to ask for a fee waiver.
+
+---
+id: public assistance other
+question: Other Public Assistance
+subquestion: |
+  Name the other type(s) of public assistance that you get, the source of the assistance, and your case numbers.
+
+  **Do not include your Social Security number.** 
+  If your case number has a Social Security number in it, **do not** enter it here. 
+  If you get Supplemental Security Income (SSI), click ${MLH_back_button_label} and select that option so that this tool can fill your case number on a separate protected form to file with the court. 
+  Other kinds of Social Security benefits are not based on having low income and do not qualify you for a fee waiver. 
+  To select a different kind of benefit, click the ${MLH_back_button_label} button.
+fields:
+  - "Type(s) of assistance": pa_other_types
+    maxlength: 49
+  - "Case number(s) *Do not include your Social Security number*": pa_other_case_numbers
+
+---
+id: public assistance SSA
+question: SSA Public Assistance
+subquestion: |
+  Enter your Social Security Administration (SSA) case number here.
+
+  SSA case numbers usually use your Social Security number (SSN), so your forms will include a *Protected Personal Identifying Information* form that you will file along with your *Fee Waiver Request* form.
+fields:
+  - 'SSA Case #': pa_ssa_number
+
+---
+id: legal assistance received
+question: |
+  Legal Assistance
+subquestion: |
+  Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?
+fields:
+  - no label: legal_service_representation
+    datatype: yesnoradio
+---
+id: legal assistance provider
+question: Legal Assistance Provider
+subquestion: |
+  What is the name of the legal services program or law school clinic you are getting help from?
+fields:
+  - no label: legal_service_provider
     maxlength: 84
+
 ---
-id: Your Income
-question: |
-  Your Income
-fields:
-  - "Gross household income": household_income
-    maxlength: 16
-  - "Per": household_income_period
-    maxlength: 39
-  - "Are you employed?": income_employment
-    datatype: yesno
-  - "Do you receive unemployment benefits?": income_unemployment
-    datatype: yesno
+id: indigency intro
+question: ""
+subquestion: |
+  To get your fees and costs waived, you must explain to the court why you can’t pay the fees and costs in your case.
+
+  When you're entering costs and values, you can use decimals from your most recent month of bills to enter the exact cost, or you can use averages.
+continue button field: indigency_intro
+
 ---
-id: Household Information
+id: household information
 question: |
-  Household Information
+  How many people live in your household, including yourself?
+subquestion: |
+  For the purpose of this tool, your household includes those people in your home 
+  with whom you share money, food, and other resources.
 fields:
-  - "Household size": household_size
-    maxlength: 8
-  - "Household income sources": household_income_sources
-    maxlength: 67
+  - no label: household_size
+    datatype: integer
+
 ---
-id: Assets
-question: |
-  Assets
+id: household income
+question: What is your average gross household income?
+subquestion: |
+  Gross income is all the money that you or any of your household members receive, including 
+  pay from a job, Social Security, and unemployment, before any deductions. If the amount 
+  changes from week to week or month to month, use an average grosshousehold income.
 fields:
-  - "Assets list": assets_list
-    input type: area
+  - Amount: household_income
+    datatype: currency
+    min: 0
+  - Every: household_income_period
+    input type: radio
+    choices: 
+      - Week
+      - Two weeks
+      - Month
+      - Year
+
 ---
-id: Obligations
-question: |
-  Obligations
+id: employed
+question: Are you employed?
 fields:
-  - "Obligations list": obligations_list
-    input type: area
+  - no label: income_employment
+    datatype: yesnoradio
 ---
-id: Screen 12
-question: |
-  Screen 12
+id: unemployment benefits
+question: Do you receive unemployment benefits?
 fields:
-  - "In the matter of": in_the_matter_of
-    maxlength: 76
-  - "Unable to pay": unable_to_pay
-    datatype: yesno
+  - no label: income_unemployment
+    datatype: yesnoradio
+
+---
+id: bank account balance
+question: Bank Account Balance
+fields:
+  - What is the total amount of money in your bank accounts?: bank_account_balance
+    label above field: true
+    datatype: currency
+
+# Vehicles
+---
+id: has any vehicles
+question: Do you have any vehicles?
+fields:
+  - no label: user_vehicles.there_are_any
+    datatype: yesnoradio
+---
+id: number of vehicles
+generic object: ALVehicleList
+question: |
+  How many vehicles do you have?
+fields:
+  - no label: x.target_number
+    datatype: integer
+---
+id: vehicle in list info
+generic object: ALVehicleList
+question: |
+  Tell us about your ${ ordinal( i ) } vehicle
+subquestion: |
+  % if len(x.complete_elements()) > 0:
+  So far you have told us about:
+  
+  % for item in x.complete_elements():
+  * ${ item.year_make_model(separator=' ') }
+  % endfor
+  % endif
+fields:
+  - Year: x[i].year
+    input type: combobox
+    code: recent_years(past=100)
+  - Make: x[i].make
+    hint: e.g, Ford, Honda
+  - Model: x[i].model
+    hint: e.g., Fusion, Civic
+  - Do you still own money on this vehicle? : x[i].balance_owed
+    datatype: yesnoradio
+  - Loan balance: x[i].balance
+    datatype: currency
+    show if: 
+      variable: x[i].balance_owed
+      is: True
+
+---
+generic object: ALVehicleList
+code: |
+  # .source is automatically 'vehicle'
+  x[i].year
+  x[i].make
+  x[i].model
+  x[i].balance_owed
+  x[i].complete = True
+
+# Other assets
+---
+id: has other assets
+question: Do you have any other assets?
+subquestion: |
+  Your assets are your property (the things you own). Include any cash or money you 
+  have that wasn’t listed in your bank accounts, your home if you own it, any stocks 
+  and bonds or retirement accounts you own, and anything else you have that you could 
+  sell for at least $500.
+fields:
+  - no label: user_assets.there_are_any
+    datatype: yesnoradio
+---
+id: list assets
+question: Your Assets
+subquestion: |
+  List each asset. You will get to answer as many times as you need to, so just 
+  describe one asset at a time.
+continue button field: assets_intro
+---
+id: asset details
+question: |
+  Tell us about your ${ ordinal(i) } asset.
+subquestion: |
+  % if len(user_assets.complete_elements()) > 0:
+  ${ collapse_template(user_assets_list_template) }
+  % endif
+fields:
+  - Description: user_assets[i].source
+  - Value: user_assets[i].value
+    datatype: currency
+---
+id: another asset
+question: Do you have any other assets?
+subquestion: |
+  % if len(user_assets.complete_elements()) > 0:
+  ${ collapse_template(user_assets_list_template) }
+  % endif
+fields:
+  - no label: user_assets.there_is_another
+    datatype: yesnoradio
+---
+template: user_assets_list_template
+subject: What have I listed so far?
+content: |
+  % if len(user_assets.complete_elements()) > 0:
+  So far you have listed:
+
+  % for item in user_assets.complete_elements():
+  * ${ item.source }, 
+  ${ currency(item.value) }
+  % endfor
+  % else:
+  So far, you have not listed anything.
+  % endif
+
+---
+id: monthly expenses
+question: Housing Costs
+subquestion: |
+  How much do you pay each month for rent or mortgage and for utilities?
+  
+  *Utilities include water, electricity, gas, and other necessities.*
+fields:
+  - Rent or mortgage: expense_rent_amount
+    datatype: currency
+  - Utilities: expense_utilities_amount
+    datatype: currency
+---
+id: monthly child support
+question: Child Support
+subquestion: |
+  Do you pay court-ordered child support?
+fields:
+  - no label: expense_child_support
+    datatype: yesnoradio
+  - Amount per month: expense_child_support_amount
+    show if: expense_child_support
+
+# Court-ordered payments
+---
+id: monthly court-ordered payments
+question: Do you have any other court-ordered payments?
+subquestion: |
+  These are payments that a judge has ordered you to make, such as installment 
+  payments on a judgment, garnishments, or spousal support. 
+  You will get to answer as many times as you need to, so just describe one 
+  payment at a time.
+fields:
+  - no label: user_court_payments.there_are_any
+    datatype: yesnoradio
+---
+id: court-ordered payment details
+question: |
+  Tell us about your ${ ordinal(i) } court-ordered payment.
+subquestion: |
+  % if len(user_court_payments.complete_elements()) > 0:
+  ${ collapse_template(user_court_payments_list_template) }
+  % endif
+fields:
+  - Description: user_court_payments[i].source
+  - Amount: user_court_payments[i].value
+    datatype: currency
+---
+id: another court-ordered payment
+question: Do you have any other court-ordered payments?
+subquestion: |
+  % if len(user_court_payments.complete_elements()) > 0:
+  ${ collapse_template(user_court_payments_list_template) }
+  % endif
+fields:
+  - no label: user_court_payments.there_is_another
+    datatype: yesnoradio
+---
+template: user_court_payments_list_template
+subject: What have I listed so far?
+content: |
+  % if len(user_court_payments.complete_elements()) > 0:
+  So far you have listed:
+
+  % for item in user_court_payments.complete_elements():
+  * ${ item.source }, 
+  ${ currency(item.value) }
+  % endfor
+  % else:
+  So far, you have not listed anything.
+  % endif
+
+# Other monthly payments
+---
+id: monthly payments
+question: Do you have other regular monthly payments?
+subquestion: |
+  Monthly payments include student loans, tuition, credit card debt or installment 
+  payments, cable or internet bills, and others.
+  You will get to answer as many times as you need to, so just describe one
+  payment at a time.
+fields:
+  - no label: user_monthly_payments.there_are_any
+    datatype: yesnoradio
+---
+id: monthly payment details
+question: |
+  What is your ${ ordinal(i) } other monthly payment for, and how much is it **per month**?
+subquestion: |
+  % if len(user_monthly_payments.complete_elements()) > 0:
+  ${ collapse_template(user_monthly_payments_list_template) }
+  % endif
+fields:
+  - Description: user_monthly_payments[i].source
+  - Amount: user_monthly_payments[i].value
+    datatype: currency
+---
+id: another monthly payment
+question: Do you another regular monthly payments?
+subquestion: |
+  % if len(user_monthly_payments.complete_elements()) > 0:
+  ${ collapse_template(user_monthly_payments_list_template) }
+  % endif
+fields:
+  - no label: user_monthly_payments.there_is_another
+    datatype: yesnoradio
+---
+template: user_monthly_payments_list_template
+subject: What have I listed so far?
+content: |
+  % if len(user_monthly_payments.complete_elements()) > 0:
+  So far you have listed:
+
+  % for item in user_monthly_payments.complete_elements():
+  * ${ item.source }, 
+  ${ currency(item.value) }
+  % endfor
+  % else:
+  So far, you have not listed anything.
+  % endif
+
+
+
+---
+# TODO
+code: |
+  unable_to_pay = not pa_received and not legal_service_representation
+
 ---
 id: preview fee_waiver_request
 question: |
@@ -288,10 +743,12 @@ subquestion: |
   ${ action_button_html(url_action('review_fee_waiver_request'), label='Edit answers', color='info') }
   
   Remember to come back to this window to continue and sign your form.
-continue button field: fee_waiver_request_preview_question    
+continue button field: fee_waiver_request_preview_question
+
 ---
 code: |
   signature_fields = ['users[0].signature']
+
 ---
 code: |
   # This is a placeholder for the addresses that will be searched
@@ -344,16 +801,24 @@ attachment:
   variable name: fee_waiver_request_Post_interview_instructions[i]
   skip undefined: True
   tagged pdf: True
+
+
+---
+code: |
+  #Dummy block TODO delete
+  trial_court_circuit = 'circuit'
+  trial_court_district = 'district'
+  trial_court_judge = 'judge'
+
 ---
 attachment:
   name: fee waiver request mc 20
   filename: fee_waiver_request_mc_20
   variable name: fee_waiver_request_attachment[i]
-  skip undefined: True
+  skip undefined: False
   pdf template file: fee_waiver_request_mc_20.pdf
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
-      - "docket_number": ${ docket_number }
       - "docket_number": ${ docket_number }
       - "trial_court_district": ${ trial_court_district }
       - "trial_court_judge": ${ trial_court_judge }
@@ -364,18 +829,21 @@ attachment:
       - "defendants_name": ${ defendants[0] }
       - "plaintiffs_address_block": ${ plaintiffs[0].address.block() }
       - "defendants_address_block": ${ defendants[0].address.block() }
-      - "plaintiffs_phone_number": ${ plaintiffs[0].phone_number }
-      - "defendants_phone_number": ${ defendants[0].phone_number }
-      - "plaintiffs_attorney_name": ${ plaintiffs_attorney_name }
-      - "plaintiffs_attorney_bar_number": ${ plaintiffs_attorney_bar_number }
-      - "defendants_attorney_name": ${ defendants_attorney_name }
-      - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
-      - "plaintiffs_attorney_address_block": ${ plaintiffs_attorney_address_block }
-      - "defendants_attorney_address_block": ${ defendants_attorney_address_block }
-      - "plaintiffs_attorney_phone_number": ${ plaintiffs_attorney_phone_number }
-      - "defendants_attorney_phone_number": ${ defendants_attorney_phone_number }
+      - "plaintiffs_phone_number": ${ phone_number_formatted(plaintiffs[0].phone_number) }
+      - "defendants_phone_number": ${ phone_number_formatted(defendants[0].phone_number) }
+      - "plaintiffs_attorney_name": ${ plaintiff_attorneys[0].name.full() }
+      - "plaintiffs_attorney_bar_number": ${ plaintiff_attorneys[0].bar_number }
+      - "plaintiffs_attorney_address_block": ${ plaintiff_attorneys[0].address.block() }
+      - "plaintiffs_attorney_phone_number": |
+          ${ phone_number_formatted(plaintiff_attorneys[0].phone_number) }
+      - "defendants_attorney_name": ${ defendant_attorneys[0].name.full() }
+      - "defendants_attorney_bar_number": ${ defendant_attorneys[0].bar_number }
+      - "defendants_attorney_address_block": ${ defendant_attorneys[0].address_block() }
+      - "defendants_attorney_phone_number": |
+          ${ phone_number_formatted(defendant_attorneys[0].phone_number) }
+
       - "in_the_matter_of": ${ in_the_matter_of }
-      - "public_assistance_received": ${ public_assistance_received }
+      - "pa_received": ${ pa_received }
       - "pa_food_assistance_program": ${ pa_food_assistance_program }
       - "pa_medicaid": ${ pa_medicaid }
       - "pa_family_independence_program": ${ pa_family_independence_program }
@@ -386,15 +854,28 @@ attachment:
       - "pa_case_numbers": ${ pa_case_numbers }
       - "legal_service_representation": ${ legal_service_representation }
       - "legal_service_provider": ${ legal_service_provider }
-      - "unable_to_pay": ${ unable_to_pay }
+      - "unable_to_pay": |
+          !(if pa_received or legal_service_representation)
       - "household_income": ${ household_income }
       - "household_income_period": ${ household_income_period }
       - "household_size": ${ household_size }
-      - "household_income_sources": ${ household_income_sources }
-      - "assets_list": ${ fee_waiver_request_attachment.safe_value("assets_list") }
-      - "obligations_list": ${ fee_waiver_request_attachment.safe_value("obligations_list") }
+      - "household_income_sources": |
+          % if income_employment and income_unemployment:
+          'Both employment and unemployment benefits'
+          % elif income_unemployment:
+          'Unemploymemt benefits'
+          % elif income_employment:
+          'Employment'
+          % else:
+          'n/a'
+          % endif
+      - "assets_list": |
+          ${ fee_waiver_request_attachment.safe_value("assets_list") }
+      - "obligations_list": |
+          ${ fee_waiver_request_attachment.safe_value("obligations_list") }
       - "signature_date": ${ signature_date }
       - "users_signature": ${ users[0].signature }
+
 ---
 code: |
   fee_waiver_request_attachment.overflow_fields["assets_list"].overflow_trigger = 170
@@ -542,13 +1023,14 @@ question: |
 fields:
   - code: |
       users[i].attorney.name_fields()
-
+  - Bar number: users[i].attorney.bar_number
 ---
 template: help_user_find_bar_number_template
 subject: |
   How can I find a lawyer's bar number?
 content: |
-  The lawyer's bar number is a five digit number after the letter P, usually listed after the lawyer's name. For example: P12345.  
+  The lawyer's bar number is a five digit number after the letter P, usually listed 
+  after the lawyer's name. For example: P12345.  
 
 
 
@@ -581,7 +1063,7 @@ content: |
 ---
 sets:
   - users[i].name.has_attorney
-id: users attorney
+id: user has attorney
 question: |
   Do you have a lawyer?
 subquestion: |
@@ -594,7 +1076,7 @@ fields:
 ---
 sets:
   - x.has_attorney
-id: persons attorney
+id: person has attorney
 generic object: ALIndividual
 question: |
   Does ${ x } have a lawyer?
@@ -606,55 +1088,13 @@ fields:
       - Yes: True
       - No: False
 
----
-sets:
-  - plaintiff_attorney.bar_number
-id: Your Attorney Bar
-question: |
-  Your Attorney Bar #
-subquestion: |
-  ${ collapse_template(help_user_find_bar_number_template) }
-fields:
-  - "Plaintiffs attorney bar number": plaintiff_attorney.bar_number
-    maxlength: 7
-
----
-id: Your Attorney
-question: |
-  Your Attorney
-subquestion: |
-  ${ collapse_template(help_user_find_bar_number_template) }
-fields:
-  - "Plaintiffs attorney name": plaintiffs_attorney_name
-    maxlength: 30
-  - "Plaintiffs attorney bar number": plaintiff_attorney_bar_number
-    maxlength: 7
-  - "Plaintiffs attorney address block": plaintiffs_attorney_address_block
-    maxlength: 84
-  - "Plaintiffs attorney phone number": plaintiffs_attorney_phone_number
-    maxlength: 42
----
-id: Opponent s Attorney
-question: |
-  Opponent's Attorney
-fields:
-  - "Defendants attorney name": defendants_attorney_name
-    maxlength: 31
-  - "Defendants attorney bar number": defendants_attorney_bar_number
-    maxlength: 11
-  - "Defendants attorney address block": defendants_attorney_address_block
-    maxlength: 84
-  - "Defendants attorney phone number": defendants_attorney_phone_number
-    maxlength: 42
-
-
 
 ---
 sets:
   - x.address.address
+  - x.address.unit
   - x.address.city
   - x.address.zip
-  - x.address.unit
   - x.address.state
   - x.address.country
   - x.phone_number
@@ -668,3 +1108,22 @@ fields:
   - Phone number: x.phone_number
     required: False
 
+
+---
+sets:
+  - x[i].name.first
+  - x[i].name.last
+  - x[i].name.middle
+  - x[i].name.suffix
+  - x[i].bar_number
+id: lawyer name and bar
+generic object: ALPeopleList
+question: |
+  What is the lawyer's name and bar number?
+fields:
+  - code: |
+      x[i].name_fields()
+  - Barrrr number: x[i].bar_number
+    required: False
+#  - code: |
+#      x[i].address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)

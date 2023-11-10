@@ -108,14 +108,6 @@ review:
     button: |
       **Other means-tested public assistance**:
       ${ word(yesno(pa_other)) }
-  - Edit: pa_other_list
-    button: |
-      **Other public assistance received**:
-      ${ pa_other_list }
-  - Edit: pa_case_numbers
-    button: |
-      **Public assistance case numbers**:
-      ${ pa_case_numbers }
   - Edit: legal_service_representation
     button: |
       **Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**:
@@ -144,14 +136,6 @@ review:
     button: |
       **Household income sources**:
       ${ household_income_sources }
-  - Edit: assets_list
-    button: |
-      **Assets list**:
-      > ${ single_paragraph(assets_list) }
-  - Edit: obligations_list
-    button: |
-      **Obligations list**:
-      > ${ single_paragraph(obligations_list) }
   - Edit: signature_date
     button: |
       **Date of signature**:
