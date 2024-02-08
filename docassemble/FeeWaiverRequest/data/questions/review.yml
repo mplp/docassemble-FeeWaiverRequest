@@ -80,53 +80,55 @@ review:
     button: |
       **In the matter of**:
       ${ in_the_matter_of }
-  - Edit: public_assistance_received
+  - label: Edit
+    fields: 
+      - pa_received
+      - pa_food_assistance_program
+      - pa_medicaid
+      - pa_family_independence_program
+      - pa_women_infants_children
+      - pa_state_disability
+      - pa_state_emergency_relief
+      - pa_refugee_assistance
+      - pa_supplemental_security
+      - pa_other
     button: |
       **Public assistance received**:
-      ${ word(yesno(public_assistance_received)) }
-  - Edit: pa_food_assistance_program
-    button: |
-      **Food Assistance Program through the state of Michigan (FAP or SNAP)**:
-      ${ word(yesno(pa_food_assistance_program)) }
-  - Edit: pa_medicaid
-    button: |
-      **Medicaid (including Healthy Michigan, CHIP, and ESO)**:
-      ${ word(yesno(pa_medicaid)) }
-  - Edit: pa_family_independence_program
-    button: |
-      **Family Independence Program through the state of Michigan (FIP or TANF)**:
-      ${ word(yesno(pa_family_independence_program)) }
-  - Edit: pa_women_infants_children
-    button: |
-      **Women, Infants, and Children (WIC)**:
-      ${ word(yesno(pa_women_infants_children)) }
-  - Edit: pa_supplemental_security
-    button: |
-      **Supplemental Security Income (SSI)**:
-      ${ word(yesno(pa_supplemental_security)) }
-  - Edit: pa_other
-    button: |
-      **Other means-tested public assistance**:
-      ${ word(yesno(pa_other)) }
+      ${ word(yesno(pa_received)) }
+      
+      Food Assistance Program (FAP or SNAP): ${ word(yesno(pa_food_assistance_program)) }
+      
+      Medicaid: ${ word(yesno(pa_medicaid)) }
+      
+      Family Independence Program (FIP or TANF): ${ word(yesno(pa_family_independence_program)) }
+      
+      Women, Infants, and Children benefits (WIC): ${ word(yesno(pa_women_infants_children)) }
+      
+      State Disability Assistance (SDA): ${ word(yesno(pa_state_disability)) }
+      
+      State Emergency Relief (SER): ${ word(yesno(pa_state_emergency_relief)) }
+      
+      Refugee Assistance Program (RAP): ${ word(yesno(pa_refugee_assistance)) }
+      
+      Supplemental Security Income (SSI): ${ word(yesno(pa_supplemental_security)) }
+      
+      Other means-tested public assistance: ${ word(yesno(pa_other)) }
   - Edit: legal_service_representation
     button: |
-      **Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**:
+      **Represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**:
       ${ word(yesno(legal_service_representation)) }
   - Edit: legal_service_provider
     button: |
       **What is the name of the legal service provider or law school clinic?**:
       ${ legal_service_provider }
-  - Edit: unable_to_pay
+  - label: Edit
+    fields: 
+      - household_income
+      - household_income_period
     button: |
-      **Unable to pay**:
-      ${ word(yesno(unable_to_pay)) }
-  - Edit: household_income
-    button: |
-      **Gross household income**:
+      Gross household income:
       ${ household_income }
-  - Edit: household_income_period
-    button: |
-      **Per**:
+      Per:
       ${ household_income_period }
   - Edit: household_size
     button: |
@@ -136,10 +138,6 @@ review:
     button: |
       **Household income sources**:
       ${ household_income_sources }
-  - Edit: signature_date
-    button: |
-      **Date of signature**:
-      ${ signature_date }
   - Edit: users.revisit
     button: |
       **Users**
@@ -155,14 +153,6 @@ review:
     button: |
       **Do you receive unemployment benefits?**:
       ${ word(yesno(income_unemployment)) }
-  - Edit: pa_state_disability
-    button: |
-      **State Disability Assistance (SDA)**:
-      ${ word(yesno(pa_state_disability)) }
-  - Edit: pa_state_emergency_relief
-    button: |
-      **State Emergency Relief (SER)**:
-      ${ word(yesno(pa_state_emergency_relief)) }
   - Edit: pa_mdhhs_case_number
     button: |
       **What is your MDHHS case number?**:
