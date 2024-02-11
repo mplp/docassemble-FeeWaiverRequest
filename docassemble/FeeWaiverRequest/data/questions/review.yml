@@ -1,25 +1,60 @@
 ---
+code: |
+  if pa_received == False:
+    pa_food_assistance_program = False
+    pa_medicaid = False
+    pa_family_independence_program = False
+    pa_women_infants_children = False
+    pa_state_disability = False
+    pa_state_emergency_relief = False
+    pa_refugee_assistance = False
+    pa_supplemental_security = False
+    pa_other = False
+    pa_mdhhs_case_number = "bpoooo"
+  pa_case_numbers
+  pa_other_calc
+  recompute_legal_service
+  pa_recalc_trigger = True
+
+---
+code: |
+  if legal_service_representation:
+    legal_service_provider
+  recompute_legal_service = True
+
+---
 id: fee waiver request review screen
 event: review_fee_waiver_request
 question: |
   Review your answers
 review:
+  - Edit: court_type
+    button: |
+      **Court Type**:
+      ${ court_type }
+  - Edit: case_type
+    button: |
+      **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**:
+      ${ case_type }
+    show if: court_type == 'circuit'
+#  - Edit: user_ask_role
+#    button: |
+#      **Are you the plaintiff/petitioner or the defendant/respondent in the court case?**:
+#      ${ user_ask_role }
   - Edit: trial_court_circuit
     button: |
       **Circuit**:
       ${ trial_court_circuit }
-  - Edit: docket_number
-    button: |
-      **Docket number**:
-      ${ docket_number }
+    show if: court_type == 'circuit'
   - Edit: trial_court_district
     button: |
       **District**:
       ${ trial_court_district }
-  - Edit: trial_court_judge
+    show if: court_type == 'district'
+  - Edit: docket_number
     button: |
-      **Judge**:
-      ${ trial_court_judge }
+      **Docket number**:
+      ${ docket_number }
   - Edit: trial_court
     button: |
       **Trial court**
@@ -30,6 +65,19 @@ review:
       % if defined("trial_court.phone_number"):
       * phone_number: ${ trial_court.phone_number }
       % endif
+  - Edit: in_the_matter_of
+    button: |
+      **In the matter of**:
+      ${ in_the_matter_of }
+    show if: case_type == 'Matter'
+    
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
   - Edit: plaintiffs.revisit
     button: |
       **Plaintiffs**
@@ -37,6 +85,7 @@ review:
       % for item in plaintiffs:
         * ${ item }
       % endfor
+    show if: case_type == 'Parties'
   - Edit: defendants.revisit
     button: |
       **Defendants**
@@ -44,6 +93,7 @@ review:
       % for item in defendants:
         * ${ item }
       % endfor
+    show if: case_type == 'Parties'
   - Edit: plaintiffs_attorney_name
     button: |
       **Plaintiffs attorney name**:
@@ -76,22 +126,12 @@ review:
     button: |
       **Defendants attorney phone number**:
       ${ defendants_attorney_phone_number }
-  - Edit: in_the_matter_of
-    button: |
-      **In the matter of**:
-      ${ in_the_matter_of }
-  - label: Edit
-    fields: 
-      - pa_received
-      - pa_food_assistance_program
-      - pa_medicaid
-      - pa_family_independence_program
-      - pa_women_infants_children
-      - pa_state_disability
-      - pa_state_emergency_relief
-      - pa_refugee_assistance
-      - pa_supplemental_security
-      - pa_other
+
+  - Edit:
+    - pa_received
+    - recompute:
+      - pa_recalc_trigger
+      - unable_to_pay
     button: |
       **Public assistance received**:
       ${ word(yesno(pa_received)) }
@@ -113,14 +153,24 @@ review:
       Supplemental Security Income (SSI): ${ word(yesno(pa_supplemental_security)) }
       
       Other means-tested public assistance: ${ word(yesno(pa_other)) }
+  - Edit: pa_mdhhs_case_number
+    button: |
+      **What is your MDHHS case number?**:
+      ${ pa_mdhhs_case_number }
+  - Edit: pa_other_case_numbers
+    button: |
+      **Other public assistance case numbers**:
+      ${ pa_other_case_numbers }
+
   - Edit: legal_service_representation
     button: |
-      **Represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**:
+      **Represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**
       ${ word(yesno(legal_service_representation)) }
   - Edit: legal_service_provider
     button: |
-      **What is the name of the legal service provider or law school clinic?**:
+      **Name of the legal service provider or law school clinic**:
       ${ legal_service_provider }
+
   - label: Edit
     fields: 
       - household_income
@@ -138,13 +188,6 @@ review:
     button: |
       **Household income sources**:
       ${ household_income_sources }
-  - Edit: users.revisit
-    button: |
-      **Users**
-
-      % for item in users:
-        * ${ item }
-      % endfor
   - Edit: income_employment
     button: |
       **Are you employed?**:
@@ -153,26 +196,6 @@ review:
     button: |
       **Do you receive unemployment benefits?**:
       ${ word(yesno(income_unemployment)) }
-  - Edit: pa_mdhhs_case_number
-    button: |
-      **What is your MDHHS case number?**:
-      ${ pa_mdhhs_case_number }
-  - Edit: pa_other_case_numbers
-    button: |
-      **Other public assistance case numbers**:
-      ${ pa_other_case_numbers }
-  - Edit: court_type
-    button: |
-      **Court Type**:
-      ${ court_type }
-  - Edit: case_type
-    button: |
-      **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**:
-      ${ case_type }
-  - Edit: user_ask_role
-    button: |
-      **Are you the plaintiff/petitioner or the defendant/respondent in the court case?**:
-      ${ user_ask_role }
 ---
 continue button field: plaintiffs.revisit
 question: |

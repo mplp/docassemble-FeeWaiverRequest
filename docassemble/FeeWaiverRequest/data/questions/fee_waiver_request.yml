@@ -59,55 +59,6 @@ sections:
   - section_final: Final Instructions
 
 
-
----
-reconsider: True
-code: |
-  assets_list = 'N/A'
-  if unable_to_pay:
-    if user_vehicles.there_are_any or bank_account_balance > 0 or user_assets.there_are_any:
-      assets_list = ''
-      if user_vehicles.there_are_any:
-        assets_list = 'I have the following ' + user_vehicles.as_noun('vehicle') + ': '
-        for vehicle in user_vehicles.complete_elements():
-          assets_list += f"{ vehicle.year_make_model(separator=' ') }; "
-          if vehicle.balance_owed:
-            assets_list += 'I still owe ' + currency(vehicle.balance) + '. '
-          else:
-            assets_list += 'this vehicle is paid off. '
-      if bank_account_balance > 0:
-        assets_list += f"I have { currency(bank_account_balance) } in my bank account(s). "
-      if user_assets.there_are_any:
-        if assets_list == '':
-          assets_list += 'I have the following ' + user_assets.as_noun('asset') + ': '
-        else:
-          assets_list += 'I also have the following ' + user_assets.as_noun('asset') + ': '
-        for asset in user_assets.complete_elements():
-          assets_list += f"{ asset.source }, { currency(asset.value) }. "
-
----
-code: |
-  obligations_list = 'N/A'
-  if unable_to_pay:
-    if expense_rent_amount > 0 or expense_utilities_amount > 0 or expense_child_support or \
-    user_court_payments.there_are_any or user_monthly_payments.there_are_any:
-      obligations_list = ''
-      if expense_rent_amount > 0:
-        obligations_list += f"I pay {currency(expense_rent_amount)} in rent or mortgage each month. "
-      if expense_utilities_amount > 0:
-        obligations_list += f"I pay {currency(expense_utilities_amount)} in utilities each month. "
-      if expense_child_support:
-        obligations_list += f"I pay {currency(expense_child_support_amount)} for court-ordered child support each month. "
-      if user_court_payments.there_are_any:
-        obligations_list += 'Other monthly court-ordered payments: '
-        obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
-        for payment in user_court_payments.complete_elements()]) + '. '
-      if user_monthly_payments.there_are_any:
-        obligations_list += 'Other monthly payments: '
-        obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
-        for payment in user_monthly_payments.complete_elements()]) + '. '
-
-
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
@@ -123,6 +74,9 @@ code: |
   # todo - delete - just for quicker testing
   users[0].name.first = 'Brett'
   users[0].name.last = 'Harrison'
+  other_parties[0].person_or_business = 'person'
+  other_parties[0].name.first = 'Jerk'
+  other_parties[0].name.last = 'Face'
   court_type = 'circuit'
   case_type = 'Parties'
   user_ask_role = 'plaintiff'
@@ -217,10 +171,6 @@ subquestion: |
   pa_other:  ${ pa_other }
   
   pa_supplemental_security: ${ pa_supplemental_security } 
-
-  Assets: ${ assets_list }
-  
-  Obligations: ${ obligations_list }
 
 continue button field: temp_review
 
@@ -337,8 +287,6 @@ question: |
   Public Assistance Received
 subquestion: |
   Which type(s) of public assistance do you receive? *Check all boxes that apply.*
-
-  PA Received: ${ pa_received } 
 fields:
   - "Food Assistance Program through the state of Michigan (also known as FAP or SNAP)": pa_food_assistance_program
     datatype: yesno
@@ -380,11 +328,13 @@ code: >-
   pa_refugee_assistance
 
 ---
+reconsider: True
 code: |
   # "Other" meaning types of assistance that are not explicitly listed on MC20 Fee Waiver Request
   pa_other_calc = pa_received and (pa_state_disability or pa_state_emergency_relief or pa_refugee_assistance or pa_other)
 
 ---
+reconsider: True
 code: |
   # "Other" meaning types of assistance that are not explicitly listed on MC20 Fee Waiver Request
   pa_other_list = ''
@@ -401,6 +351,7 @@ code: |
     pa_other_list = pa_other_list[0:-2]
 
 ---
+reconsider: True
 code: |
   pa_case_numbers = ''
 
@@ -768,6 +719,52 @@ content: |
   % endif
 
 
+---
+#reconsider: True
+code: |
+  assets_list = 'N/A'
+  if unable_to_pay:
+    if user_vehicles.there_are_any or bank_account_balance > 0 or user_assets.there_are_any:
+      assets_list = ''
+      if user_vehicles.there_are_any:
+        assets_list = 'I have the following ' + user_vehicles.as_noun('vehicle') + ': '
+        for vehicle in user_vehicles.complete_elements():
+          assets_list += f"{ vehicle.year_make_model(separator=' ') }; "
+          if vehicle.balance_owed:
+            assets_list += 'I still owe ' + currency(vehicle.balance) + '. '
+          else:
+            assets_list += 'this vehicle is paid off. '
+      if bank_account_balance > 0:
+        assets_list += f"I have { currency(bank_account_balance) } in my bank account(s). "
+      if user_assets.there_are_any:
+        if assets_list == '':
+          assets_list += 'I have the following ' + user_assets.as_noun('asset') + ': '
+        else:
+          assets_list += 'I also have the following ' + user_assets.as_noun('asset') + ': '
+        for asset in user_assets.complete_elements():
+          assets_list += f"{ asset.source }, { currency(asset.value) }. "
+
+---
+code: |
+  obligations_list = 'N/A'
+  if unable_to_pay:
+    if expense_rent_amount > 0 or expense_utilities_amount > 0 or expense_child_support or \
+    user_court_payments.there_are_any or user_monthly_payments.there_are_any:
+      obligations_list = ''
+      if expense_rent_amount > 0:
+        obligations_list += f"I pay {currency(expense_rent_amount)} in rent or mortgage each month. "
+      if expense_utilities_amount > 0:
+        obligations_list += f"I pay {currency(expense_utilities_amount)} in utilities each month. "
+      if expense_child_support:
+        obligations_list += f"I pay {currency(expense_child_support_amount)} for court-ordered child support each month. "
+      if user_court_payments.there_are_any:
+        obligations_list += 'Other monthly court-ordered payments: '
+        obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
+        for payment in user_court_payments.complete_elements()]) + '. '
+      if user_monthly_payments.there_are_any:
+        obligations_list += 'Other monthly payments: '
+        obligations_list += comma_and_list([f"{ currency(payment.value) } for { payment.source }" \
+        for payment in user_monthly_payments.complete_elements()]) + '. '
 
 ---
 # TODO
@@ -836,8 +833,6 @@ question: |
   All done
 subquestion: |
   Thank you ${users}. Your form is ready to download and deliver.
-  
-  assets_list: ${ assets_list }
   
   View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
 
@@ -962,20 +957,18 @@ attachment:
         n/a
         % endif
     - "assets_list": |
-        ${ fee_waiver_request_attachment.safe_value('assets_list') }
+        ${ fee_waiver_request_attachment.safe_value("assets_list") }
     - "obligations_list": |
         ${ fee_waiver_request_attachment.safe_value("obligations_list") }
 #    - "signature_date": ${ signature_date }
 #    - "users_signature": ${ users[0].signature }
 
 ---
-depends on: docket_number
 code: |
-  test_crap = "test"
----
-code: |
-  fee_waiver_request_attachment.overflow_fields["assets_list"].overflow_trigger = 225
+  fee_waiver_request_attachment.overflow_fields["assets_list"]._original_value = assets_list
+  fee_waiver_request_attachment.overflow_fields["assets_list"].overflow_trigger = 200
   fee_waiver_request_attachment.overflow_fields["assets_list"].label = "Assets list"
+  fee_waiver_request_attachment.overflow_fields["obligations_list"]._original_value = obligations_list
   fee_waiver_request_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
   fee_waiver_request_attachment.overflow_fields["obligations_list"].label = "Obligations list"
   fee_waiver_request_attachment.overflow_fields.gathered = True
@@ -1264,4 +1257,3 @@ fields:
     required: False
 #  - code: |
 #      x[i].address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)
-
