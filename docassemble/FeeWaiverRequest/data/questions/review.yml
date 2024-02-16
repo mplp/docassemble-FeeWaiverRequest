@@ -1,6 +1,9 @@
 ---
 code: |
-  if pa_received == False:
+  if pa_received == True:
+    pa_food_assistance_program
+    #pa_received == False:
+  else:
     pa_food_assistance_program = False
     pa_medicaid = False
     pa_family_independence_program = False
@@ -10,17 +13,34 @@ code: |
     pa_refugee_assistance = False
     pa_supplemental_security = False
     pa_other = False
-    pa_mdhhs_case_number = "bpoooo"
-  pa_case_numbers
-  pa_other_calc
+    # deleting these causes them to be asked again... *%@#ing docassemble...
+    #del pa_mdhhs_case_number
+    #del pa_other_types
+    #del pa_other_case_numbers
   recompute_legal_service
   pa_recalc_trigger = True
 
 ---
 code: |
-  if legal_service_representation:
-    legal_service_provider
+  if pa_received == False:
+    if legal_service_representation:
+      legal_service_provider
+    else:
+      check_for_indigency
   recompute_legal_service = True
+
+---
+code: |
+  if plaintiffs[0].has_attorney:
+    plaintiff_attorneys[0].bar_number
+    plaintiff_attorneys[0].address.address
+  recompute_plaintiff_attorney = True
+---
+code: |
+  if defendants[0].has_attorney:
+    defendant_attorneys[0].bar_number
+    defendant_attorneys[0].address.address
+  recompute_defendant_attorney = True
 
 ---
 id: fee waiver request review screen
@@ -73,64 +93,107 @@ review:
     
   - Edit: users.revisit
     button: |
-      **Users**
+      **Your Information**
 
       % for item in users:
-        * ${ item }
+        ${ item }
+        
+        ${ item.address.block() }
+        
+        ${ word("") if item.no_phone_number else item.phone_numbers() }
       % endfor
-  - Edit: plaintiffs.revisit
+  - Edit: other_parties.revisit
     button: |
-      **Plaintiffs**
+      **Other Party Information**
 
-      % for item in plaintiffs:
-        * ${ item }
+      % for item in other_parties:
+        ${ item }
+        
+        ${ item.address.block() }
+        
+        ${ word("") if item.no_phone_number else item.phone_numbers() }
       % endfor
     show if: case_type == 'Parties'
-  - Edit: defendants.revisit
-    button: |
-      **Defendants**
+#  - Edit: plaintiffs.revisit
+#    button: |
+#      **Plaintiffs**
+#
+#      % for item in plaintiffs:
+#        * ${ item }
+#      % endfor
+#    show if: case_type == 'Parties'
+#  - Edit: defendants.revisit
+#    button: |
+#      **Defendants**
+#
+#      % for item in defendants:
+#        * ${ item }
+#      % endfor
+#    show if: case_type == 'Parties'
 
-      % for item in defendants:
-        * ${ item }
-      % endfor
-    show if: case_type == 'Parties'
-  - Edit: plaintiffs_attorney_name
+  - Edit: 
+    - plaintiffs[0].has_attorney
+    - recompute:
+      - recompute_plaintiff_attorney
     button: |
-      **Plaintiffs attorney name**:
-      ${ plaintiffs_attorney_name }
-  - Edit: plaintiffs_attorney_bar_number
+      **${ plaintiffs[0].name.full() } has attorney?**
+      
+      ${ plaintiffs[0].has_attorney }
+  - Edit: 
+    - plaintiff_attorneys[0].bar_number # do bar first so it triggers custom page
+    - plaintiff_attorneys[0].name.first
+    - plaintiff_attorneys[0].address.address
+    - plaintiff_attorneys[0].address.unit
+    - plaintiff_attorneys[0].address.city
+    - plaintiff_attorneys[0].address.state
+    - plaintiff_attorneys[0].address.zip
+    - plaintiff_attorneys[0].phone_number
     button: |
-      **Plaintiffs attorney bar number**:
-      ${ plaintiffs_attorney_bar_number }
-  - Edit: defendants_attorney_name
+      **Plaintiff's attorney**:
+
+      ${ plaintiff_attorneys[0].name.full() }
+      ${ plaintiff_attorneys[0].bar_number }
+      
+      ${ plaintiff_attorneys[0].address.block() }
+      
+      Phone: ${ phone_number_formatted(plaintiff_attorneys[0].phone_number) }
+    show if: plaintiffs[0].has_attorney
+
+  - Edit: 
+    - defendants[0].has_attorney
+    - recompute:
+      - recompute_defendant_attorney
     button: |
-      **Defendants attorney name**:
-      ${ defendants_attorney_name }
-  - Edit: defendants_attorney_bar_number
+      **${ defendants[0].name.full() } has attorney?**
+      
+      ${ defendants[0].has_attorney }
+  - Edit: 
+    - defendant_attorneys[0].bar_number
+    - defendant_attorneys[0].name.first
+    - defendant_attorneys[0].address.address
+    - defendant_attorneys[0].address.unit
+    - defendant_attorneys[0].address.city
+    - defendant_attorneys[0].address.state
+    - defendant_attorneys[0].address.zip
+    - defendant_attorneys[0].phone_number
     button: |
-      **Defendants attorney bar number**:
-      ${ defendants_attorney_bar_number }
-  - Edit: plaintiffs_attorney_address_block
-    button: |
-      **Plaintiffs attorney address block**:
-      ${ plaintiffs_attorney_address_block }
-  - Edit: defendants_attorney_address_block
-    button: |
-      **Defendants attorney address block**:
-      ${ defendants_attorney_address_block }
-  - Edit: plaintiffs_attorney_phone_number
-    button: |
-      **Plaintiffs attorney phone number**:
-      ${ plaintiffs_attorney_phone_number }
-  - Edit: defendants_attorney_phone_number
-    button: |
-      **Defendants attorney phone number**:
-      ${ defendants_attorney_phone_number }
+      **Defendant's attorney**:
+      
+      ${ defendant_attorneys[0].name.full() }
+      ${ defendant_attorneys[0].bar_number }
+      
+      ${ defendant_attorneys[0].address.block() }
+      
+      Phone: ${ phone_number_formatted(defendant_attorneys[0].phone_number) }
+    show if: defendants[0].has_attorney
 
   - Edit:
     - pa_received
     - recompute:
       - pa_recalc_trigger
+      - recompute_legal_service
+      - fuck_this_shit
+      - pa_other_list
       - unable_to_pay
     button: |
       **Public assistance received**:
@@ -157,14 +220,30 @@ review:
     button: |
       **What is your MDHHS case number?**:
       ${ pa_mdhhs_case_number }
+  - Edit: pa_other_types
+    button: |
+      **Other types(s) of public assistance received**:
+      ${ pa_other_types }
+    show if: pa_other == True
   - Edit: pa_other_case_numbers
     button: |
       **Other public assistance case numbers**:
       ${ pa_other_case_numbers }
-
-  - Edit: legal_service_representation
+    show if: pa_other == True
+  - Edit: pa_ssa_number
     button: |
-      **Represented by a legal services program, or do you receive assistance from a law school clinic due to low income?**
+      **SSA Case #**:
+      ${ pa_ssa_number }
+    show if: pa_supplemental_security == True
+
+  - Edit: 
+      - legal_service_representation
+      - recompute: 
+        - pa_received
+        - pa_food_assistance_program
+        - recompute_legal_service
+    button: |
+      **Receive legal assistance?**
       ${ word(yesno(legal_service_representation)) }
   - Edit: legal_service_provider
     button: |
@@ -196,6 +275,7 @@ review:
     button: |
       **Do you receive unemployment benefits?**:
       ${ word(yesno(income_unemployment)) }
+
 ---
 continue button field: plaintiffs.revisit
 question: |
@@ -247,17 +327,43 @@ confirm: True
 ---
 continue button field: users.revisit
 question: |
-  Edit users
+  Edit your information
 subquestion: |
   ${ users.table }
-
-  ${ users.add_action() }
 ---
 table: users.table
 rows: users
 columns:
-  - Signature: |
-      row_item.signature if defined("row_item.signature") else ""
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
 edit:
-  - signature
+  - name.first
+  - name.middle
+  - name.last
+confirm: True
+
+---
+continue button field: other_parties.revisit
+question: |
+  Edit other party  information
+subquestion: |
+  ${ other_parties.table }
+---
+table: other_parties.table
+rows: other_parties
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+edit:
+  - name.first
+  - name.middle
+  - name.last
 confirm: True

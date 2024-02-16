@@ -5,6 +5,7 @@ include:
 ---
 modules:
   - .fee_waiver_request
+  - .mlh_general
 
 ---
 # docassemble-level metadata
@@ -77,6 +78,14 @@ code: |
   other_parties[0].person_or_business = 'person'
   other_parties[0].name.first = 'Jerk'
   other_parties[0].name.last = 'Face'
+  other_parties[0].address.address = '100 Loser Lane'
+  other_parties[0].address.unit = ''
+  other_parties[0].address.city = 'Loserville'
+  other_parties[0].address.state = 'LA'
+  other_parties[0].address.zip = '77777'
+  other_parties[0].phone_number = '3036667777'
+  #users[0].has_attorney = False
+  other_parties[0].has_attorney = False
   court_type = 'circuit'
   case_type = 'Parties'
   user_ask_role = 'plaintiff'
@@ -96,12 +105,15 @@ code: |
       plaintiffs.gather()
       #plaintiffs[0].address.address
       #plaintiffs[0].phone_number
-      #if users[0].has_attorney:
-        #plaintiff_attorneys[0].bar_number
-        #plaintiff_attorneys[0].address.address
+      if users[0].has_attorney:
+        plaintiff_attorneys[0].bar_number
+        plaintiff_attorneys[0].address.address
       defendants.gather()
-      #defendants[0].address.address
-      #defendants[0].phone_number
+      defendants[0].address.address
+      defendants[0].phone_number
+      if defendants[0].has_attorney:
+        defendant_attorneys[0].bar_number
+        defendant_attorneys[0].address.address
     else:
       defendants.gather()
       defendants[0].address.address
@@ -126,7 +138,6 @@ code: |
   set_progress(32)
   nav.set_section("section_affidavit")
 
-  # TODO: 
   if pa_received:
     if pa_mdhhs:
       pa_mdhhs_case_number
@@ -137,27 +148,33 @@ code: |
   elif legal_service_representation:
     legal_service_provider
   else:
-    indigency_intro
-    household_size
-    household_income
-    income_employment
-    income_unemployment
-    bank_account_balance
-    if user_vehicles.there_are_any:
-      user_vehicles.gather()
-    bank_account_balance
-    if user_assets.there_are_any:
-      assets_intro
-      user_assets.gather()
-    expense_rent_amount
-    expense_child_support
-    if user_court_payments.there_are_any:
-      user_court_payments.gather()
-    if user_monthly_payments.there_are_any:
-      user_monthly_payments.gather()
-  temp_review
+    check_for_indigency
   nav.set_section("section_final")
   interview_order_fee_waiver_request = True
+
+
+---
+code: |
+  indigency_intro
+  household_size
+  household_income
+  income_employment
+  income_unemployment
+  bank_account_balance
+  if user_vehicles.there_are_any:
+    user_vehicles.gather()
+  bank_account_balance
+  if user_assets.there_are_any:
+    assets_intro
+    user_assets.gather()
+  expense_rent_amount
+  expense_child_support
+  if user_court_payments.there_are_any:
+    user_court_payments.gather()
+  if user_monthly_payments.there_are_any:
+    user_monthly_payments.gather()
+  check_for_indigency = True
+  
 
 ---
 question: Review
@@ -261,12 +278,13 @@ fields:
     label above field: True
 
 ---
+reconsider: True
 id: public assistance received
 question: Public Assistance
 subquestion: |
   Do you get public assistance that is **based on having low income**?
   
-  ***Note:** Social Security Disability Insurance benefits (SSDI) are not based on having low income, so if that is the only benefit that you receive, select No.*
+  ***Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income, so if that is the only benefit that you receive, select No.*
   
   ${ collapse_template(public_assistance_template) }
 fields:
@@ -283,6 +301,7 @@ content: |
 
 ---
 id: public assistance types
+continue button field: fuck_this_shit
 question: |
   Public Assistance Received
 subquestion: |
@@ -355,7 +374,7 @@ reconsider: True
 code: |
   pa_case_numbers = ''
 
-  if pa_received:
+  if pa_mdhhs:
     pa_case_numbers += pa_mdhhs_case_number + ', '
   if pa_other:
     pa_case_numbers += pa_other_case_numbers + ', '
@@ -772,32 +791,6 @@ code: |
   unable_to_pay = not pa_received and not legal_service_representation
 
 ---
-# Just a little block to set some PDF variables in one place that will be used
-# over multiple attachments
-reconsider: True
-code: |
-  if the_court.type == 'circuit':
-    trial_court_circuit = the_court.number
-  else:
-    trial_court_circuit = ''
-
-  if the_court.type == 'district':
-    trial_court_district = the_court.number
-  else:
-    trial_court_district = ''
-
-  trial_court_county = the_court.address.county.upper()
-  trial_court_address_on_one_line = the_court.address.on_one_line()
-  trial_court_phone_number = the_court.phone
-
-  if court_type_selection == 'probate':
-    plaintiffs_name = "N/A"
-    defendants_name = "N/A"
-  else:
-    plaintiffs_name = plaintiffs[0]
-    defendants_name = defendants[0]
-
----
 id: preview fee_waiver_request
 question: |
   Preview your form before you sign it
@@ -900,6 +893,60 @@ attachment:
   skip undefined: True
   tagged pdf: True
 
+---
+# Just a little block to set some PDF variables in one place that will be used
+# over multiple attachments
+reconsider: True
+code: |
+  if the_court.type == 'circuit':
+    trial_court_circuit = the_court.number
+  else:
+    trial_court_circuit = ''
+
+  if the_court.type == 'district':
+    trial_court_district = the_court.number
+  else:
+    trial_court_district = ''
+
+  trial_court_county = the_court.address.county.upper()
+  trial_court_address_on_one_line = the_court.address.on_one_line()
+  trial_court_phone_number = the_court.phone
+
+  if court_type_selection == 'probate':
+    plaintiffs_name = "N/A"
+    defendants_name = "N/A"
+  else:
+    plaintiffs_name = plaintiffs[0]
+    defendants_name = defendants[0]
+
+  if plaintiffs[0].has_attorney:
+    plaintiffs_attorney_name = plaintiff_attorneys[0].name.full()
+    plaintiffs_attorney_bar_number = plaintiff_attorneys[0].bar_number
+    plaintiffs_attorney_address_block = plaintiff_attorneys[0].address.block()
+    plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
+  else:
+    plaintiffs_attorney_name = ''
+    plaintiffs_attorney_bar_number = ''
+    plaintiffs_attorney_address_block = ''
+    plaintiffs_attorney_phone_number = ''
+    
+  if defendants[0].has_attorney:
+    defendants_attorney_name = defendant_attorneys[0].name.full()
+    defendants_attorney_bar_number = defendant_attorneys[0].bar_number
+    defendants_attorney_address_block = defendant_attorneys[0].address.block()
+    defendants_attorney_phone_number = phone_number_formatted(defendant_attorneys[0].phone_number)
+  else:
+    defendants_attorney_name = ''
+    defendants_attorney_bar_number = ''
+    defendants_attorney_address_block = ''
+    defendants_attorney_phone_number = ''
+
+---
+sets:
+  - x.address_and_phone
+generic object: ALIndividual
+code: |
+  'just a test'
 
 ---
 code: |
@@ -926,6 +973,31 @@ attachment:
 
     - "plaintiffs_name": ${ plaintiffs_name }
     - "defendants_name": ${ defendants_name }
+    - "plaintiffs_address_and_phone": |
+        ${ plaintiffs[0].address.block() }
+        ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+    - "defendants_address_and_phone": |
+        ${ defendants[0].address.block() }
+        ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+    
+    - "plaintiffs_attorney_name": ${ plaintiffs_attorney_name }
+    - "plaintiffs_attorney_bar_number": ${ plaintiffs_attorney_bar_number }
+    - "plaintiffs_attorney_address_and_phone": |
+        % if plaintiffs[0].has_attorney:
+        ${ plaintiff_attorneys[0].address.block() }
+        ${ word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers() }
+        % endif
+    #- "plaintiffs_attorney_address_block": ${ plaintiffs_attorney_address_block }
+    #- "plaintiffs_attorney_phone_number": ${ plaintiffs_attorney_phone_number }
+    - "defendants_attorney_name": ${ defendants_attorney_name }
+    - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
+    #- "defendants_attorney_address_block": ${ defendants_attorney_address_block }
+    #- "defendants_attorney_phone_number": ${ defendants_attorney_phone_number }
+    - "defendants_attorney_address_and_phone": |
+        % if defendants[0].has_attorney:
+        ${ defendant_attorneys[0].address.block() }
+        ${ word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers() }
+        % endif
 
     - "pa_received": ${ pa_received }
     - "pa_food_assistance_program": ${ pa_food_assistance_program }
@@ -944,9 +1016,11 @@ attachment:
     - "household_income": ${ household_income if unable_to_pay else '' }
     - "household_income_period": ${ household_income_period if unable_to_pay else '' }
     - "household_size": ${ household_size if unable_to_pay else '' }
+    # must leave a blank line beneath this since ANYTHING we put under will be included,
+    # even a comment or empty quotes. :-p
     - "household_income_sources": |
-        % if not unable_to_pay:
-        ''
+        % if not unable_to_pay: 
+
         % elif income_employment and income_unemployment:
         Both employment and unemployment benefits
         % elif income_unemployment:
@@ -991,6 +1065,7 @@ attachment:
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
       - "defendants_name": ${ defendants_name }
+      - "users1_name": ${ users[0].name.full() }
       - "in_the_matter_of": ${ in_the_matter_of }
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
@@ -1012,6 +1087,7 @@ attachment:
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
       - "defendants_name": ${ defendants_name }
+      - "users1_name": ${ users[0].name.full() }
       - "in_the_matter_of": ${ in_the_matter_of }
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
@@ -1138,57 +1214,17 @@ continue button field: court_info_display
 
 
 
-
-
-###########################################
----
-sets:
-  - users[i].attorney.name.first
-  - users[i].attorney.name.last
-  - users[i].attorney.name.middle
-  - users[i].attorney.name.suffix
-id: User attorney info
-question: |
-  What is the lawyer’s name and bar number?
-fields:
-  - code: |
-      users[i].attorney.name_fields()
-  - Bar number: users[i].attorney.bar_number
----
-template: help_user_find_bar_number_template
-subject: |
-  How can I find a lawyer's bar number?
-content: |
-  The lawyer's bar number is a five digit number after the letter P, usually listed 
-  after the lawyer's name. For example: P12345.  
-
-
-
-
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # #  MOVE to framework
 # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # 
-
-# to override default address labels in ql_baseline.yml
----
-generic object: ALAddress
-template: x.address_label
-content: |
-  Street Address or P.O. Box
----
-generic object: ALAddress
-template: x.unit_label
-content: |
-  Apartment, suite, etc
----
-generic object: ALAddress
-template: x.zip_label
-content: |
-  Zip Code
-
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # 
 
 ---
 sets:
@@ -1217,7 +1253,6 @@ fields:
     choices:
       - Yes: True
       - No: False
-
 
 ---
 sets:
@@ -1250,10 +1285,17 @@ id: lawyer name and bar
 generic object: ALPeopleList
 question: |
   What is the lawyer's name and bar number?
+subquestion:
+  ${ collapse_template(help_user_find_bar_number_template) }
 fields:
   - code: |
       x[i].name_fields()
   - Barrrr number: x[i].bar_number
     required: False
-#  - code: |
-#      x[i].address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)
+---
+template: help_user_find_bar_number_template
+subject: |
+  How can I find a lawyer's bar number?
+content: |
+  The lawyer's bar number is a five digit number after the letter P, usually listed 
+  after the lawyer's name. For example: P12345.  
