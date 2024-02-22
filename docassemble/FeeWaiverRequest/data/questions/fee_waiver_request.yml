@@ -5,7 +5,6 @@ include:
 ---
 modules:
   - .fee_waiver_request
-  - .mlh_general
 
 ---
 # docassemble-level metadata
@@ -36,7 +35,7 @@ code: |
   MLH_instructions_included = True
   MLH_court_forms = True
   MLH_esign_supported = True
-  MLH_case_type_language = 'Look for the two-letter case type code at the end of your case number. If you are filing a new case and do not know the case type code yet, you can find it in this ${ MLH_CASE_TYPE_CODE_LIST }. Also look at the column labeled **Type of Filing**. If this column only says **Subsequent Filings** for your court and you need to file papers to start a case, then you cannot e-file your *Fee Waiver Request*. If you are allowed to e-file your initial papers, this column will say **Case Initiation**. If you need to file a *Fee Waiver Request* with a post-judgment motion, it will be considered a subsequent filing.'
+  MLH_case_type_language = f"Look for the two-letter case type code at the end of your case number. If you are filing a new case and do not know the case type code yet, you can find it in this { MLH_CASE_TYPE_CODE_LIST }. Also look at the column labeled **Type of Filing**. If this column only says **Subsequent Filings** for your court and you need to file papers to start a case, then you cannot e-file your *Fee Waiver Request*. If you are allowed to e-file your initial papers, this column will say **Case Initiation**. If you need to file a *Fee Waiver Request* with a post-judgment motion, it will be considered a subsequent filing."
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
@@ -51,7 +50,9 @@ objects:
   - user_assets: ALSimpleValueList
   - user_court_payments: ALSimpleValueList
   - user_monthly_payments: ALSimpleValueList
-
+---
+features:
+  progress bar: False
 ---
 sections:
   - section_intro: Introduction
@@ -85,11 +86,14 @@ code: |
   other_parties[0].address.zip = '77777'
   other_parties[0].phone_number = '3036667777'
   #users[0].has_attorney = False
-  other_parties[0].has_attorney = False
-  court_type = 'circuit'
-  case_type = 'Parties'
+  #other_parties[0].has_attorney = False
+  #court_type = 'circuit'
+  #case_type = 'Parties'
   user_ask_role = 'plaintiff'
   docket_number = 'C1212'
+  #user_assets.there_are_any = False
+  #user_court_payments.there_are_any = False
+  user_monthly_payments.there_are_any = False
 
   users[0].name.first
   court_type_selection
@@ -99,6 +103,13 @@ code: |
     case_type = 'Parties'
   elif court_type == 'probate':
     case_type = 'Matter'
+  county_choice
+  if court_count > 1:
+    court_index = court_index_for_specific_court_type
+  else:
+    # This means there is only one court of this type for this county.
+    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  #court_info_display
 
   if case_type == 'Parties':
     if user_ask_role == 'plaintiff':
@@ -127,22 +138,15 @@ code: |
     in_the_matter_of
 
   docket_number
-  court_county_selection
-  if court_count > 1:
-    court_index
-  else:
-    # This means there is only one court of this type for this county.
-    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
-  #court_info_display
 
-  set_progress(32)
   nav.set_section("section_affidavit")
 
   if pa_received:
-    if pa_mdhhs:
-      pa_mdhhs_case_number
-    elif pa_other:  
-      pa_other_types
+    if pa_mdhhs or pa_other:
+      if pa_mdhhs:
+        pa_mdhhs_case_number
+      if pa_other:
+        pa_other_types
     elif pa_supplemental_security:
       pa_ssa_number
   elif legal_service_representation:
@@ -150,8 +154,8 @@ code: |
   else:
     check_for_indigency
   nav.set_section("section_final")
+  MLH_standard_outro_pages
   interview_order_fee_waiver_request = True
-
 
 ---
 code: |
@@ -163,7 +167,6 @@ code: |
   bank_account_balance
   if user_vehicles.there_are_any:
     user_vehicles.gather()
-  bank_account_balance
   if user_assets.there_are_any:
     assets_intro
     user_assets.gather()
@@ -174,22 +177,6 @@ code: |
   if user_monthly_payments.there_are_any:
     user_monthly_payments.gather()
   check_for_indigency = True
-  
-
----
-question: Review
-subquestion: |
-  pa_received: ${ pa_received } 
-  
-  pa_medicaid: ${ pa_medicaid } 
-  
-  pa_mdhhs: ${ pa_mdhhs }
-  
-  pa_other:  ${ pa_other }
-  
-  pa_supplemental_security: ${ pa_supplemental_security } 
-
-continue button field: temp_review
 
 ###################### Main order ######################
 ---
@@ -271,9 +258,9 @@ fields:
 id: matter of
 question: Case Matter
 subquestion: |
-  The top of your petition or other court forms should say "In the matter of ________."
+  The top of your petition or other court forms should say "In the matter of ______."
 fields:
-  - 'Look at your petition and complete the following: the name of my case is "In the matter of ________."': in_the_matter_of
+  - 'Look at your petition and complete the following: the name of my case is "In the matter of ______."': in_the_matter_of
     maxlength: 76
     label above field: True
 
@@ -860,7 +847,7 @@ objects:
   - fee_waiver_request_Post_interview_instructions: >-
       ALDocument.using(title="Instructions", 
       filename="fee_waiver_request_next_steps.docx", enabled=True, has_addendum=False)
-  - fee_waiver_request_attachment: >-
+  - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
       filename="fee_waiver_request_mc_20", enabled=True, has_addendum=True,
       default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
@@ -879,8 +866,8 @@ code: |
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[fee_waiver_request_Post_interview_instructions, fee_waiver_request_attachment, protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment], filename="fee_waiver_request_packet", title="All forms to download for your records", enabled=True)
-  - al_court_bundle: ALDocumentBundle.using(elements=[fee_waiver_request_attachment], filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=True)
+  - al_user_bundle: ALDocumentBundle.using(elements=[fee_waiver_request_Post_interview_instructions, fee_waiver_attachment, protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment], filename="fee_waiver_request_packet", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[fee_waiver_attachment], filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=True)
 ---
 # Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
 # used for "preview" and "final" keys, and logic in the template checks the value of 
@@ -958,7 +945,7 @@ code: |
 attachment:
   name: fee waiver request mc 20
   filename: fee_waiver_request_mc_20
-  variable name: fee_waiver_request_attachment[i]
+  variable name: fee_waiver_attachment[i]
   skip undefined: False
   pdf template file: fee_waiver_request_mc_20.pdf
   fields:
@@ -1020,7 +1007,7 @@ attachment:
     # even a comment or empty quotes. :-p
     - "household_income_sources": |
         % if not unable_to_pay: 
-
+        ${ '' }
         % elif income_employment and income_unemployment:
         Both employment and unemployment benefits
         % elif income_unemployment:
@@ -1031,21 +1018,36 @@ attachment:
         n/a
         % endif
     - "assets_list": |
-        ${ fee_waiver_request_attachment.safe_value("assets_list") }
+        ${ fee_waiver_attachment.safe_value("assets_list") if unable_to_pay else '' }
     - "obligations_list": |
-        ${ fee_waiver_request_attachment.safe_value("obligations_list") }
-#    - "signature_date": ${ signature_date }
-#    - "users_signature": ${ users[0].signature }
-
+        ${ fee_waiver_attachment.safe_value("obligations_list") if unable_to_pay else '' }
+    - "signature_date": |
+        % if MLH_esign == True:
+        ${ signature_date }
+        % else:
+        ${ '' }
+        % endif
+    - "users_signature": |
+        % if MLH_esign == True:
+        /s/ ${ users[0] }
+        % else:
+        ${ '' }
+        % endif
+    - "pursuant_to": |
+        % if MLH_esign == True:
+        ${ MLH_pursuant_to }
+        % else:
+        ${ '' }
+        % endif
 ---
 code: |
-  fee_waiver_request_attachment.overflow_fields["assets_list"]._original_value = assets_list
-  fee_waiver_request_attachment.overflow_fields["assets_list"].overflow_trigger = 200
-  fee_waiver_request_attachment.overflow_fields["assets_list"].label = "Assets list"
-  fee_waiver_request_attachment.overflow_fields["obligations_list"]._original_value = obligations_list
-  fee_waiver_request_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
-  fee_waiver_request_attachment.overflow_fields["obligations_list"].label = "Obligations list"
-  fee_waiver_request_attachment.overflow_fields.gathered = True
+  fee_waiver_attachment.overflow_fields["assets_list"]._original_value = assets_list
+  fee_waiver_attachment.overflow_fields["assets_list"].overflow_trigger = 200
+  fee_waiver_attachment.overflow_fields["assets_list"].label = "Assets list (continued from 3)"
+  fee_waiver_attachment.overflow_fields["obligations_list"]._original_value = obligations_list
+  fee_waiver_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
+  fee_waiver_attachment.overflow_fields["obligations_list"].label = "Obligations list (continued from 3)"
+  fee_waiver_attachment.overflow_fields.gathered = True
 
 
 ---
@@ -1106,33 +1108,11 @@ attachment:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 ---
-id: Court county choice
-mandatory: False
-question: |
-  Hello! (to delete)
-  
-  % if al_form_type == 'starts_case':
-  What county do you want to file in?
-  % elif al_form_type == 'appeal':
-  What is the county of the trial court your case was originally filed in?
-  % else:
-  Please choose the county of the court where your case is.
-  % endif
-subquestion: |
-  % if al_form_type != 'starts_case':
-  ${ collapse_template(help_user_choose_court_template) }
-  % endif
-fields:
-  - County: county_choice
-    code: court_list._load_courts()["address_county"].unique()
-continue button field: court_county_selection
-
----
 id: Court type choice
 mandatory: False
 question: |
   Hey! (to delete)
-    
+  
   % if al_form_type == 'starts_case':
   What court is this case in?
   % elif al_form_type == 'appeal':
@@ -1168,49 +1148,20 @@ content: |
   The title of a probate case is often "In the matter of…"
 
 ---
-mandatory: False
-question: |
-  Oh hi!
-  % if al_form_type == 'starts_case':
-  What court do you want to file in?
-  % elif al_form_type == 'appeal':
-  What trial court was your case originally filed in?
-  % else:
-  Please choose the court where your case is.
-  % endif
-subquestion: |
-  % if al_form_type != 'starts_case':
-  ${ collapse_template(help_user_choose_court_template) }
-  % endif
-fields:
-  - Court 1: court_index
-    code: court_list.filter_courts_by_2([county_choice], ['district', 'circuit', 'probate'], column_1='address_county', column_2='type')
-    
----
+# TODO: Move to framework without conflicting with existing court_index question(s)
+id: county court choice
 question: Which ${ capitalize(court_type) } Court in ${ county_choice } County is this case in?
 subquestion: |
   Select a court below.
 fields:
-  - County Courts: court_index
+  - County Courts: court_index_for_specific_court_type
     code: court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')
 
 ---
+# Gets the count of the specified [court_type] courts for [county_choice] County
 code: |
   court_count = len(list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')))
   
----
-mandatory: False
-question: |
-  Display court info
-subquestion: |
-  court_index: ${ court_index }
-
-  ${ the_court } - ${ county_choice } County
-
-  ${ the_court.address.block(bare=True) }
-  
-  ${ the_court.phone } 
-continue button field: court_info_display
 
 
 
@@ -1228,34 +1179,6 @@ continue button field: court_info_display
 
 ---
 sets:
-  - users[i].name.has_attorney
-id: user has attorney
-question: |
-  Do you have a lawyer?
-subquestion: |
-fields:
-  - no label: users[i].has_attorney
-    input type: radio
-    choices:
-      - Yes: True
-      - No: False
----
-sets:
-  - x.has_attorney
-id: person has attorney
-generic object: ALIndividual
-question: |
-  Does ${ x } have a lawyer?
-subquestion: |
-fields:
-  - no label: x.has_attorney
-    input type: radio
-    choices:
-      - Yes: True
-      - No: False
-
----
-sets:
   - x.address.address
   - x.address.unit
   - x.address.city
@@ -1270,32 +1193,5 @@ question: |
 fields:
   - code: |
       x.address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)
-  - Phone number: x.phone_number
+  - Phone number: x.phone_numberrrrrr
     required: False
-
-
----
-sets:
-  - x[i].name.first
-  - x[i].name.last
-  - x[i].name.middle
-  - x[i].name.suffix
-  - x[i].bar_number
-id: lawyer name and bar
-generic object: ALPeopleList
-question: |
-  What is the lawyer's name and bar number?
-subquestion:
-  ${ collapse_template(help_user_find_bar_number_template) }
-fields:
-  - code: |
-      x[i].name_fields()
-  - Barrrr number: x[i].bar_number
-    required: False
----
-template: help_user_find_bar_number_template
-subject: |
-  How can I find a lawyer's bar number?
-content: |
-  The lawyer's bar number is a five digit number after the letter P, usually listed 
-  after the lawyer's name. For example: P12345.  
