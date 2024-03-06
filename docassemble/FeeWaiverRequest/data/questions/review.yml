@@ -68,19 +68,43 @@ question: |
 review:
   - note: |
       ### Case and Court Information
-  - Edit: court_type
+  - Edit: 
+    - court_type
+    - county_choice
+    #- court_index
+    #- court_index_for_specific_court_type
+    # TODO - get these changes to work... <sigh... f*&#!ing docassemble pos...>
+    - recompute:
+      - the_court
+      - recompute_court
+      - court_index
+      - court_count
+      #- court_index_for_specific_court_type  # this actually deletes it, but does re-ask it...
     button: |
-      **Court Type:**
-      ${ court_type }
+      **Court Information**
+      
+      ${ the_court.number } ${ the_court.type.capitalize() } Court
+      
+      ${ county_choice } County
+      
+      ${ the_court.address.on_one_line() }
+  - Edit:
+    - court_index_for_specific_court_type
+    - recompute:
+      - the_court
+      - court_index
+      - court_count
+    button: |
+      **${ the_court.type.capitalize() } Court Location**
+      ${ the_court.number }
+      
+      ${ court_index_for_specific_court_type }
+    show if: court_count > 1
   - Edit: case_type
     button: |
       **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**
       ${ case_type }
     show if: court_type == 'circuit'
-#  - Edit: user_ask_role
-#    button: |
-#      **Are you the plaintiff/petitioner or the defendant/respondent in the court case?**
-#      ${ user_ask_role }
   - Edit: trial_court_circuit
     button: |
       **Circuit:**
@@ -95,16 +119,6 @@ review:
     button: |
       **Docket number:**
       ${ docket_number }
-  - Edit: trial_court
-    button: |
-      **Trial court**
-  
-      % if defined("trial_court.address.address"):
-      * address: ${ trial_court.address.block() }
-      % endif
-      % if defined("trial_court.phone_number"):
-      * phone_number: ${ trial_court.phone_number }
-      % endif
   - Edit: in_the_matter_of
     button: |
       **In the matter of:**
@@ -112,6 +126,7 @@ review:
     show if: case_type == 'Matter'
     
   - note: |
+      <hr>
       ### Parties and Attorneys
     show if: case_type == 'Parties'
   - Edit: users.revisit
@@ -125,6 +140,7 @@ review:
         
         ${ word("") if item.no_phone_number else item.phone_numbers() }
       % endfor
+      show if: case_type == 'Parties'
   - Edit: other_parties.revisit
     button: |
       **Other Party Information**
@@ -144,6 +160,7 @@ review:
     button: |
       **${ plaintiffs[0].name.full() } has attorney?**
       ${ word(yesno(plaintiffs[0].has_attorney)) }
+    show if: case_type == 'Parties'
   - Edit: 
     - plaintiff_attorneys[0].bar_number # do bar first so it triggers custom page
     - plaintiff_attorneys[0].name.first
@@ -162,8 +179,7 @@ review:
       ${ plaintiff_attorneys[0].address.block() }
       
       Phone: ${ phone_number_formatted(plaintiff_attorneys[0].phone_number) }
-    show if: plaintiffs[0].has_attorney
-
+    show if: case_type == 'Parties' and plaintiffs[0].has_attorney
   - Edit: 
     - defendants[0].has_attorney
     - recompute:
@@ -189,9 +205,10 @@ review:
       ${ defendant_attorneys[0].address.block() }
       
       Phone: ${ phone_number_formatted(defendant_attorneys[0].phone_number) }
-    show if: defendants[0].has_attorney
+    show if: case_type == 'Parties' and defendants[0].has_attorney
 
   - note: |
+      <hr>
       ### Public Assistance
   - Edit:
     - pa_received
@@ -245,7 +262,8 @@ review:
     show if: pa_supplemental_security == True
 
   - note: |
-      ### Legal Service Representation
+      <hr>
+      ### - - - Legal Service Representation - - -
     show if: pa_received == False
   - Edit: 
     - legal_service_representation
@@ -263,6 +281,7 @@ review:
       ${ legal_service_provider }
 
   - note: |
+      <hr>
       ### Household Information
     show if: unable_to_pay
   - Edit: household_size
@@ -292,6 +311,7 @@ review:
     show if: unable_to_pay
 
   - note: |
+      <hr>
       ### Assets
     show if: unable_to_pay
   - Edit: 
@@ -354,6 +374,7 @@ review:
     show if: unable_to_pay and user_assets.there_are_any
 
   - note: |
+      <hr>
       ### Payment and Obligations
     show if: unable_to_pay
   - Edit: 
@@ -431,58 +452,23 @@ review:
       % endfor
     show if: unable_to_pay and user_monthly_payments.there_are_any
 
+  - note: |
+      <hr>
+      ### Electronic Signature
   - Edit: MLH_esign
     button: |
       **Include your electronic signature on forms?**
       ${ word(yesno(MLH_esign)) }
 
 ---
-continue button field: plaintiffs.revisit
-question: |
-  Edit plaintiffs
-subquestion: |
-  ${ plaintiffs.table }
-
-  ${ plaintiffs.add_action() }
----
-table: plaintiffs.table
-rows: plaintiffs
-columns:
-  - Name: |
-      row_item.name.full() if defined("row_item.name.first") else ""
-  - Address: |
-      row_item.address.block() if defined("row_item.address.address") else ""
-  - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
-edit:
-  - name.first
-  - address.address
-  - phone_number
-confirm: True
-
----
-continue button field: defendants.revisit
-question: |
-  Edit defendants
-subquestion: |
-  ${ defendants.table }
-
-  ${ defendants.add_action() }
----
-table: defendants.table
-rows: defendants
-columns:
-  - Name: |
-      row_item.name.full() if defined("row_item.name.first") else ""
-  - Address: |
-      row_item.address.block() if defined("row_item.address.address") else ""
-  - Phone number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
-edit:
-  - name.first
-  - address.address
-  - phone_number
-confirm: True
+reconsider: True
+code: |
+  if court_count > 1:
+    court_index = court_index_for_specific_court_type
+  else:
+    # This means there is only one court of this type for this county.
+    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  recompute_court = True
 
 ---
 continue button field: users.revisit

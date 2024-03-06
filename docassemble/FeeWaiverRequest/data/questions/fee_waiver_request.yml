@@ -60,7 +60,6 @@ sections:
   - section_affidavit: Affidavit Information
   - section_final: Final Instructions
 
-
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
@@ -74,73 +73,89 @@ code: |
   nav.set_section("section_info")
 
   # todo - delete - just for quicker testing
-  users[0].name.first = 'Brett'
-  users[0].name.last = 'Harrison'
-  other_parties[0].person_or_business = 'person'
-  other_parties[0].name.first = 'Jerk'
-  other_parties[0].name.last = 'Face'
-  other_parties[0].address.address = '100 Loser Lane'
-  other_parties[0].address.unit = ''
-  other_parties[0].address.city = 'Loserville'
-  other_parties[0].address.state = 'LA'
-  other_parties[0].address.zip = '77777'
-  other_parties[0].phone_number = '3036667777'
-  #users[0].has_attorney = False
-  #other_parties[0].has_attorney = False
-  #court_type = 'circuit'
-  #case_type = 'Parties'
-  user_ask_role = 'plaintiff'
-  docket_number = 'C1212'
-  #user_assets.there_are_any = False
-  #user_court_payments.there_are_any = False
-  user_monthly_payments.there_are_any = False
+  if False:
+    users[0].name.first = 'Brett'
+    users[0].name.last = 'Harrison'
+    #users[0].address.address = '502 E White'
+    users[0].address.unit = ''
+    users[0].address.city = 'Trinidad'
+    users[0].address.state = 'CA'
+    users[0].address.zip = '81082'
+    #users[0].phone_number = '7757229432'
+    #users[0].no_phone_number = False
+    other_parties[0].person_or_business = 'person'
+    other_parties[0].name.first = 'Jerk'
+    other_parties[0].name.last = 'Face'
+    #other_parties[0].address.address = '100 Loser Lane'
+    other_parties[0].address.unit = ''
+    other_parties[0].address.city = 'Loserville'
+    other_parties[0].address.state = 'LA'
+    other_parties[0].address.zip = '77777'
+    #other_parties[0].no_phone_number = False
+    #other_parties[0].phone_number = '3036667777'
+    users[0].has_attorney = False
+    other_parties[0].has_attorney = False
+    #court_type = 'circuit'
+    #case_type = 'Parties'
+    user_ask_role = 'plaintiff'
+    docket_number = 'C1212'
+    #user_assets.there_are_any = False
+    #user_court_payments.there_are_any = False
+    user_monthly_payments.there_are_any = False
+    MLH_esign = True
+    pa_received = True
+    pa_medicaid = True
+    pa_mdhhs_case_number = 'DHS1212'
 
   users[0].name.first
+
   court_type_selection
+  county_choice
+  if court_count > 1:
+    court_index = court_index_for_specific_court_type
+  else:
+  # This means there is only one court of this type for this county.
+    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+
   if court_type == 'circuit':
     case_type
   elif court_type == 'district':
     case_type = 'Parties'
   elif court_type == 'probate':
     case_type = 'Matter'
-  county_choice
-  if court_count > 1:
-    court_index = court_index_for_specific_court_type
-  else:
-    # This means there is only one court of this type for this county.
-    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
-  #court_info_display
 
   if case_type == 'Parties':
     if user_ask_role == 'plaintiff':
       plaintiffs.gather()
-      #plaintiffs[0].address.address
-      #plaintiffs[0].phone_number
+      plaintiffs[0].address.address
+      plaintiffs[0].phone_number
       if users[0].has_attorney:
-        plaintiff_attorneys[0].bar_number
+        plaintiff_attorneys[0].bar_number # will also get name
         plaintiff_attorneys[0].address.address
       defendants.gather()
       defendants[0].address.address
       defendants[0].phone_number
       if defendants[0].has_attorney:
-        defendant_attorneys[0].bar_number
+        defendant_attorneys[0].bar_number # will also get name
         defendant_attorneys[0].address.address
     else:
       defendants.gather()
       defendants[0].address.address
       defendants[0].phone_number
       if users[0].has_attorney:
-        defendant_attorneys[0].name.first
+        defendant_attorneys[0].bar_number # will also get name
+        defendant_attorneys[0].address.address
       plaintiffs.gather()
       plaintiffs[0].address.address
       plaintiffs[0].phone_number
+      if plaintiffs[0].has_attorney:
+        plaintiff_attorneys[0].bar_number # will also get name
+        plaintiff_attorneys[0].address.address
   elif case_type == 'Matter':
     in_the_matter_of
-
   docket_number
 
   nav.set_section("section_affidavit")
-
   if pa_received:
     if pa_mdhhs or pa_other:
       if pa_mdhhs:
@@ -154,7 +169,7 @@ code: |
   else:
     check_for_indigency
   nav.set_section("section_final")
-  MLH_standard_outro_pages
+  #MLH_standard_outro_pages
   interview_order_fee_waiver_request = True
 
 ---
@@ -245,10 +260,6 @@ question: What is the case number?
 subquestion: |
   You can find the case number by looking at the top of papers you’ve gotten in the case. 
   If you haven't filed the case yet, you won't have a case number, so leave this blank.
-  
-  P/P: ${ plaintiffs[0] }
-  
-  D/R: ${ defendants[0] }
 fields:
   - 'Case #': docket_number
     required: False
@@ -629,7 +640,7 @@ fields:
 # Court-ordered payments
 ---
 id: monthly court-ordered payments
-question: Do you have any other court-ordered payments?
+question: Do you have any other monthly court-ordered payments?
 subquestion: |
   These are payments that a judge has ordered you to make, such as installment 
   payments on a judgment, garnishments, or spousal support. 
@@ -641,14 +652,14 @@ fields:
 ---
 id: court-ordered payment details
 question: |
-  Tell us about your ${ ordinal(i) } court-ordered payment.
+  What is your ${ ordinal(i) } monthly court-ordered payment for, and how much is it **per month**?
 subquestion: |
   % if len(user_court_payments.complete_elements()) > 0:
   ${ collapse_template(user_court_payments_list_template) }
   % endif
 fields:
   - Description: user_court_payments[i].source
-  - Amount: user_court_payments[i].value
+  - Monthly payment: user_court_payments[i].value
     datatype: currency
 ---
 id: another court-ordered payment
@@ -697,7 +708,7 @@ subquestion: |
   % endif
 fields:
   - Description: user_monthly_payments[i].source
-  - Amount: user_monthly_payments[i].value
+  - Monthly payment: user_monthly_payments[i].value
     datatype: currency
 ---
 id: another monthly payment
@@ -863,10 +874,11 @@ code: |
 ---
 code: |
   protected_pii_mc_97a_attachment.enabled = insert_mc_97a
+
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[fee_waiver_request_Post_interview_instructions, fee_waiver_attachment, protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment], filename="fee_waiver_request_packet", title="All forms to download for your records", enabled=True)
+  - al_user_bundle: ALDocumentBundle.using(elements=[cover_sheet_template, fee_waiver_request_Post_interview_instructions, fee_waiver_attachment, protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment], filename="fee_waiver_request_packet", title="All forms to download for your records", enabled=True)
   - al_court_bundle: ALDocumentBundle.using(elements=[fee_waiver_attachment], filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=True)
 ---
 # Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
@@ -929,19 +941,6 @@ code: |
     defendants_attorney_phone_number = ''
 
 ---
-sets:
-  - x.address_and_phone
-generic object: ALIndividual
-code: |
-  'just a test'
-
----
-code: |
-  #Dummy block TODO delete
-  trial_court_judge = 'judge'
-  trial_court_address.county = trial_court.address.county
-
----
 attachment:
   name: fee waiver request mc 20
   filename: fee_waiver_request_mc_20
@@ -974,12 +973,8 @@ attachment:
         ${ plaintiff_attorneys[0].address.block() }
         ${ word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers() }
         % endif
-    #- "plaintiffs_attorney_address_block": ${ plaintiffs_attorney_address_block }
-    #- "plaintiffs_attorney_phone_number": ${ plaintiffs_attorney_phone_number }
     - "defendants_attorney_name": ${ defendants_attorney_name }
     - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
-    #- "defendants_attorney_address_block": ${ defendants_attorney_address_block }
-    #- "defendants_attorney_phone_number": ${ defendants_attorney_phone_number }
     - "defendants_attorney_address_and_phone": |
         % if defendants[0].has_attorney:
         ${ defendant_attorneys[0].address.block() }
@@ -1003,8 +998,6 @@ attachment:
     - "household_income": ${ household_income if unable_to_pay else '' }
     - "household_income_period": ${ household_income_period if unable_to_pay else '' }
     - "household_size": ${ household_size if unable_to_pay else '' }
-    # must leave a blank line beneath this since ANYTHING we put under will be included,
-    # even a comment or empty quotes. :-p
     - "household_income_sources": |
         % if not unable_to_pay: 
         ${ '' }
@@ -1049,6 +1042,11 @@ code: |
   fee_waiver_attachment.overflow_fields["obligations_list"].label = "Obligations list (continued from 3)"
   fee_waiver_attachment.overflow_fields.gathered = True
 
+---
+code: |
+  temp = """After you sign and date the Fee Waiver Request, make a copy of it for your records. If your case is a family law matter make an extra copy for the Friend of the Court. You can ask the court clerk for copies. There may be a fee.
+  
+  File the original signed form with the court clerk, along with the Friend of the Court copy (if needed). The clerk may be able to waive your fees at that time, or the clerk may send your Fee Waiver Request to a judge to decide."""
 
 ---
 attachment:
@@ -1093,105 +1091,3 @@ attachment:
       - "in_the_matter_of": ${ in_the_matter_of }
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-### Stuff to move to framework???
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
----
-id: Court type choice
-mandatory: False
-question: |
-  Hey! (to delete)
-  
-  % if al_form_type == 'starts_case':
-  What court is this case in?
-  % elif al_form_type == 'appeal':
-  What court your case was originally filed in?
-  % else:
-  Please choose type of court where your case is.
-  % endif
-subquestion: |
-  % if al_form_type != 'starts_case':
-  ${ collapse_template(court_type_selection_template) }
-  % endif
-fields:
-  - Court: court_type
-    choices:
-      - Circuit: circuit
-      - District: district
-      - Probate: probate
-continue button field: court_type_selection
-
----
-template: court_type_selection_template
-subject: |
-  What is this?
-content: |
-  A civil case is filed because of a disagreement between two people, businesses, or organizations. The disagreement usually involves one person believing that he or she has been hurt, had rights violated, or had property damaged by another person. A civil case is not a criminal case.
-
-  **District Court** is where general civil cases are heard if the amount of money in dispute is less than or equal to $25,000.
-
-  **Circuit Court** is where general civil cases are heard if the amount in dispute is more than $25,000.
-
-  **Probate Court** handles things like wills and estate administration, guardianships and conservatorships, adoptions, and registering foreign birth certificates.
-
-  The title of a probate case is often "In the matter of…"
-
----
-# TODO: Move to framework without conflicting with existing court_index question(s)
-id: county court choice
-question: Which ${ capitalize(court_type) } Court in ${ county_choice } County is this case in?
-subquestion: |
-  Select a court below.
-fields:
-  - County Courts: court_index_for_specific_court_type
-    code: court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')
-
----
-# Gets the count of the specified [court_type] courts for [county_choice] County
-code: |
-  court_count = len(list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type')))
-  
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # #  MOVE to framework
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # 
-
----
-sets:
-  - x.address.address
-  - x.address.unit
-  - x.address.city
-  - x.address.zip
-  - x.address.state
-  - x.address.country
-  - x.phone_number
-id: persons address and phone
-generic object: ALIndividual
-question: |
-  What is ${ x.possessive('address') } and phone number???
-fields:
-  - code: |
-      x.address_fields(country_code=AL_DEFAULT_COUNTRY, default_state=AL_DEFAULT_STATE)
-  - Phone number: x.phone_numberrrrrr
-    required: False
