@@ -132,12 +132,14 @@ code: |
       if users[0].has_attorney:
         plaintiff_attorneys[0].bar_number # will also get name
         plaintiff_attorneys[0].address.address
+        plaintiff_attorneys[0].no_phone_number
       defendants.gather()
       defendants[0].address.address
       defendants[0].phone_number
       if defendants[0].has_attorney:
         defendant_attorneys[0].bar_number # will also get name
         defendant_attorneys[0].address.address
+        defendant_attorneys[0].no_phone_number
     else:
       defendants.gather()
       defendants[0].address.address
@@ -145,18 +147,21 @@ code: |
       if users[0].has_attorney:
         defendant_attorneys[0].bar_number # will also get name
         defendant_attorneys[0].address.address
+        defendant_attorneys[0].no_phone_number
       plaintiffs.gather()
       plaintiffs[0].address.address
       plaintiffs[0].phone_number
       if plaintiffs[0].has_attorney:
         plaintiff_attorneys[0].bar_number # will also get name
         plaintiff_attorneys[0].address.address
+        plaintiff_attorneys[0].no_phone_number
   elif case_type == 'Matter':
     in_the_matter_of
   docket_number
 
   nav.set_section("section_affidavit")
   if pa_received:
+    pa_food_assistance_program # just to trigger thte page with all the checkboxes
     if pa_mdhhs or pa_other:
       if pa_mdhhs:
         pa_mdhhs_case_number
@@ -299,7 +304,6 @@ content: |
 
 ---
 id: public assistance types
-continue button field: fuck_this_shit
 question: |
   Public Assistance Received
 subquestion: |
@@ -338,7 +342,6 @@ code: |
     pa_supplemental_security = False
     pa_other = False
 ---
-reconsider: True
 code: >-
   pa_mdhhs = pa_food_assistance_program or pa_medicaid or pa_family_independence_program or 
   pa_women_infants_children or pa_state_disability or pa_state_emergency_relief or 
@@ -784,7 +787,6 @@ code: |
         for payment in user_monthly_payments.complete_elements()]) + '. '
 
 ---
-# TODO
 code: |
   unable_to_pay = not pa_received and not legal_service_representation
 
@@ -828,36 +830,45 @@ subquestion: |
   View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
 
   ${ action_button_html(url_action('review_fee_waiver_request'), label='Edit answers', color='info') }
-  
-  
-  ${ al_user_bundle.download_list_html() }
-  
 
+  ${ al_cover_bundle.download_list_html() }
+  
+  ${ al_court_bundle.download_list_html(include_zip=False) }
+  
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
 ---
+reconsider: True
 code: |
   insert_pii_form = pa_supplemental_security and not (pa_mdhhs or pa_other)
   #VALUE(PA SSI TF) AND !(DHS public assistance received CO OR VALUE(PA other TF))
 ---
+reconsider: True
 code: |
-  insert_mc_97 = insert_pii_form and user_ask_role == 'defendant'
+  insert_mc_97 = insert_pii_form and (case_type == 'Parties' and user_ask_role == 'defendant')
   #Insert PII form CO AND Client is D/R CO
 ---
+reconsider: True
 code: >-
-  insert_mc_97a = insert_pii_form and (user_ask_role == 'plaintiff' or court_type == 'probate' or 
-  (court_type == 'circuit' and case_type == 'Matter'))
+  insert_mc_97a = insert_pii_form and (
+    (case_type == 'Parties' and user_ask_role == 'plaintiff') or 
+    court_type == 'probate' or 
+    (court_type == 'circuit' and case_type == 'Matter'))
   #Insert PII form CO AND (
   #	(Client is P/P CO OR VALUE(Court MC) = "Probate" OR 
   #	(VALUE(Court MC) = "Circuit" AND VALUE(Case type MC) = "Matter"))
   #)
+---
+reconsider: True
+code: |
+  pii_included = insert_mc_97 or insert_mc_97a
 
 ---
 # ALDocument objects specify the metadata for each template
 objects:
-  - fee_waiver_request_Post_interview_instructions: >-
-      ALDocument.using(title="Instructions", 
-      filename="fee_waiver_request_next_steps.docx", enabled=True, has_addendum=False)
+#  - fee_waiver_instructions: >-
+#      ALDocument.using(title="Instructions", 
+#      filename="fee_waiver_request_next_steps.docx", enabled=True, has_addendum=False)
   - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
       filename="fee_waiver_request_mc_20", enabled=True, has_addendum=True,
@@ -876,21 +887,26 @@ code: |
   protected_pii_mc_97a_attachment.enabled = insert_mc_97a
 
 ---
+# The fee waiver's instructions are located right on the cover sheet. Override framework.
+code: |
+  cover_sheet_complete_1 = "After you sign and date the Fee Waiver Request, make a copy of it for your records. If your case is a family law matter, make an extra copy for the Friend of the Court. You can ask the court clerk for copies. There may be a fee.\n\n"
+  cover_sheet_complete_1 += "File the original signed form with the court clerk, along with the Friend of the Court copy (if needed). The clerk may be able to waive your fees at that time, or the clerk may send your Fee Waiver Request to a judge to decide."
+
+---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[cover_sheet_template, fee_waiver_request_Post_interview_instructions, fee_waiver_attachment, protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment], filename="fee_waiver_request_packet", title="All forms to download for your records", enabled=True)
-  - al_court_bundle: ALDocumentBundle.using(elements=[fee_waiver_attachment], filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=True)
----
-# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
-# used for "preview" and "final" keys, and logic in the template checks the value of 
-# `i` to show or hide the user's signature
-attachment:
-  name: Post-interview-Instructions
-  filename: fee_waiver_request_next_steps
-  docx template file: fee_waiver_request_next_steps.docx
-  variable name: fee_waiver_request_Post_interview_instructions[i]
-  skip undefined: True
-  tagged pdf: True
+  - al_cover_bundle: >-
+      ALDocumentBundle.using(elements=[cover_sheet_template], 
+      filename="Instructions", title="Instructions", enabled=True)
+  - al_user_bundle: >-
+      ALDocumentBundle.using(elements=[cover_sheet_template, fee_waiver_attachment, 
+      protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment],
+      filename="fee_waiver_request_packet", title="All forms to download for your records",
+      enabled=True)
+  - al_court_bundle: >-
+      ALDocumentBundle.using(elements=[fee_waiver_attachment, protected_pii_mc_97_attachment,
+      protected_pii_mc_97a_attachment], 
+      filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=pii_included)
 
 ---
 # Just a little block to set some PDF variables in one place that will be used
@@ -907,33 +923,40 @@ code: |
   else:
     trial_court_district = ''
 
-  trial_court_county = the_court.address.county.upper()
+  if the_court.type == 'probate':
+    trial_court_county = 'PROBATE COURT OF ' + the_court.address.county.upper()
+  else:
+    trial_court_county = the_court.address.county.upper()
+
   trial_court_address_on_one_line = the_court.address.on_one_line()
   trial_court_phone_number = the_court.phone
-
-  if court_type_selection == 'probate':
+  
+  trial_court_judge = ''  # As of March 2024, not implemented (per A2J tool)
+  
+  if case_type == 'Matter':
     plaintiffs_name = "N/A"
     defendants_name = "N/A"
   else:
     plaintiffs_name = plaintiffs[0]
     defendants_name = defendants[0]
 
-  if plaintiffs[0].has_attorney:
+  if case_type == 'Parties' and plaintiffs[0].has_attorney:
     plaintiffs_attorney_name = plaintiff_attorneys[0].name.full()
     plaintiffs_attorney_bar_number = plaintiff_attorneys[0].bar_number
     plaintiffs_attorney_address_block = plaintiff_attorneys[0].address.block()
-    plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
+    #plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
+    plaintiffs_attorney_phone_number = word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
   else:
     plaintiffs_attorney_name = ''
     plaintiffs_attorney_bar_number = ''
     plaintiffs_attorney_address_block = ''
     plaintiffs_attorney_phone_number = ''
     
-  if defendants[0].has_attorney:
+  if case_type == 'Parties' and defendants[0].has_attorney:
     defendants_attorney_name = defendant_attorneys[0].name.full()
     defendants_attorney_bar_number = defendant_attorneys[0].bar_number
     defendants_attorney_address_block = defendant_attorneys[0].address.block()
-    defendants_attorney_phone_number = phone_number_formatted(defendant_attorneys[0].phone_number)
+    defendants_attorney_phone_number = word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
   else:
     defendants_attorney_name = ''
     defendants_attorney_bar_number = ''
@@ -960,25 +983,33 @@ attachment:
     - "plaintiffs_name": ${ plaintiffs_name }
     - "defendants_name": ${ defendants_name }
     - "plaintiffs_address_and_phone": |
-        ${ plaintiffs[0].address.block() }
-        ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+        % if case_type == 'Parties':
+          ${ plaintiffs[0].address.block() }
+          ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+        % else:
+          ${ word('') }
+        % endif
     - "defendants_address_and_phone": |
-        ${ defendants[0].address.block() }
-        ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+        % if case_type == 'Parties':
+          ${ defendants[0].address.block() }
+          ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+        % else:
+          ${ word('') }
+        % endif
     
     - "plaintiffs_attorney_name": ${ plaintiffs_attorney_name }
     - "plaintiffs_attorney_bar_number": ${ plaintiffs_attorney_bar_number }
     - "plaintiffs_attorney_address_and_phone": |
-        % if plaintiffs[0].has_attorney:
-        ${ plaintiff_attorneys[0].address.block() }
-        ${ word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers() }
+        % if case_type == 'Parties' and plaintiffs[0].has_attorney:
+          ${ plaintiffs_attorney_address_block }
+          ${ plaintiffs_attorney_phone_number }
         % endif
     - "defendants_attorney_name": ${ defendants_attorney_name }
     - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
     - "defendants_attorney_address_and_phone": |
-        % if defendants[0].has_attorney:
-        ${ defendant_attorneys[0].address.block() }
-        ${ word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers() }
+        % if case_type == 'Parties' and defendants[0].has_attorney:
+          ${ defendants_attorney_address_block }
+          ${ defendants_attorney_phone_number }
         % endif
 
     - "pa_received": ${ pa_received }
@@ -1028,7 +1059,7 @@ attachment:
         % endif
     - "pursuant_to": |
         % if MLH_esign == True:
-        ${ MLH_pursuant_to }
+        ${ MLH_esign_tag }
         % else:
         ${ '' }
         % endif
@@ -1043,22 +1074,15 @@ code: |
   fee_waiver_attachment.overflow_fields.gathered = True
 
 ---
-code: |
-  temp = """After you sign and date the Fee Waiver Request, make a copy of it for your records. If your case is a family law matter make an extra copy for the Friend of the Court. You can ask the court clerk for copies. There may be a fee.
-  
-  File the original signed form with the court clerk, along with the Friend of the Court copy (if needed). The clerk may be able to waive your fees at that time, or the clerk may send your Fee Waiver Request to a judge to decide."""
-
----
 attachment:
   name: protected pii MC 97
-  #filename: protected_pii_mc_97
   variable name: protected_pii_mc_97_attachment[i]
   skip undefined: True
   pdf template file: protected_pii_mc_97.pdf
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
-      - "trial_court_county": ${ trial_court_county }
+      - "trial_court_county": ${ trial_court_county if court_type == 'probate' else '' }
       - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
       - "trial_court_phone_number": ${ the_court.phone }
       - "docket_number": ${ docket_number }
@@ -1073,14 +1097,13 @@ attachment:
 ---
 attachment:
   name: protected pii MC 97a
-  #filename: protected_pii_mc_97a
   variable name: protected_pii_mc_97a_attachment[i]
   skip undefined: True
   pdf template file: protected_pii_mc_97a.pdf
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
-      - "trial_court_county": ${ trial_court_county }
+      - "trial_court_county": ${ trial_court_county if court_type == 'probate' else ''}
       - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
       - "trial_court_phone_number": ${ the_court.phone }
       - "docket_number": ${ docket_number }

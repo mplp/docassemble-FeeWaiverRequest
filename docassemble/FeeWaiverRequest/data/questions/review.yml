@@ -2,7 +2,13 @@
 code: |
   if pa_received == True:
     pa_food_assistance_program
-    #pa_received == False:
+    if pa_mdhhs or pa_other:
+      if pa_mdhhs:
+        pa_mdhhs_case_number
+      if pa_other:
+        pa_other_types
+    elif pa_supplemental_security:
+      pa_ssa_number
   else:
     pa_food_assistance_program = False
     pa_medicaid = False
@@ -20,6 +26,11 @@ code: |
   recompute_legal_service
   pa_recalc_trigger = True
 
+---
+code: |
+  if pa_supplemental_security:
+    pa_ssa_number
+  pa_ssa_recalc_trigger = True
 ---
 code: |
   if pa_received == False:
@@ -73,7 +84,7 @@ review:
     - county_choice
     #- court_index
     #- court_index_for_specific_court_type
-    # TODO - get these changes to work... <sigh... f*&#!ing docassemble pos...>
+    # TODO - get these changes to work... 
     - recompute:
       - the_court
       - recompute_court
@@ -83,10 +94,14 @@ review:
     button: |
       **Court Information**
       
+      % if court_type == 'probate':
+      ${ county_choice } County Probate Court
+      % else:
       ${ the_court.number } ${ the_court.type.capitalize() } Court
-      
+
       ${ county_choice } County
-      
+      % endif
+
       ${ the_court.address.on_one_line() }
   - Edit:
     - court_index_for_specific_court_type
@@ -95,15 +110,14 @@ review:
       - court_index
       - court_count
     button: |
-      **${ the_court.type.capitalize() } Court Location**
-      ${ the_court.number }
+      **${ county_choice } ${ the_court.type.capitalize() } Court Location:**
       
-      ${ court_index_for_specific_court_type }
+      ${ the_court.number } (${ the_court.name })
     show if: court_count > 1
   - Edit: case_type
     button: |
       **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**
-      ${ case_type }
+      ${ word(yesno(case_type=='Parties')) }
     show if: court_type == 'circuit'
   - Edit: trial_court_circuit
     button: |
@@ -113,7 +127,9 @@ review:
   - Edit: trial_court_district
     button: |
       **District:**
+      Test:
       ${ trial_court_district }
+      Test 2:
     show if: court_type == 'district'
   - Edit: docket_number
     button: |
@@ -212,8 +228,18 @@ review:
       ### Public Assistance
   - Edit:
     - pa_received
+    - pa_food_assistance_program
+    - pa_medicaid
+    - pa_family_independence_program
+    - pa_women_infants_children
+    - pa_state_disability
+    - pa_state_emergency_relief
+    - pa_refugee_assistance
+    - pa_supplemental_security
     - recompute:
       - pa_recalc_trigger
+      - pa_ssa_recalc_trigger
+      - pa_mdhhs
       - recompute_legal_service
       - pa_other_list
       - unable_to_pay
@@ -242,7 +268,7 @@ review:
       Other means-tested public assistance: ${ word(yesno(pa_other)) }
   - Edit: pa_mdhhs_case_number
     button: |
-      **What is your MDHHS case number?**
+      **MDHHS Case #:**
       ${ pa_mdhhs_case_number }
     show if: pa_mdhhs
   - Edit: pa_other_types
@@ -259,7 +285,7 @@ review:
     button: |
       **SSA Case #:**
       ${ pa_ssa_number }
-    show if: pa_supplemental_security == True
+    show if: pa_supplemental_security == True and pa_mdhhs != True
 
   - note: |
       <hr>
