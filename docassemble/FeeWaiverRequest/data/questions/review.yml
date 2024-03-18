@@ -28,7 +28,7 @@ code: |
 
 ---
 code: |
-  if pa_supplemental_security:
+  if pa_supplemental_security and not (pa_mdhhs or pa_other):
     pa_ssa_number
   pa_ssa_recalc_trigger = True
 ---
@@ -73,7 +73,7 @@ code: |
 
 ---
 id: fee waiver request review screen
-event: review_fee_waiver_request
+event: review_full
 question: |
   Review your answers
 review:
@@ -275,12 +275,12 @@ review:
     button: |
       **Other types(s) of public assistance received:**
       ${ pa_other_types }
-    show if: pa_other == True
+    show if: pa_received and pa_other == True
   - Edit: pa_other_case_numbers
     button: |
       **Other public assistance case numbers:**
       ${ pa_other_case_numbers }
-    show if: pa_other == True
+    show if: pa_received and pa_other == True
   - Edit: pa_ssa_number
     button: |
       **SSA Case #:**
@@ -289,7 +289,7 @@ review:
 
   - note: |
       <hr>
-      ### - - - Legal Service Representation - - -
+      ### Legal Service Representation
     show if: pa_received == False
   - Edit: 
     - legal_service_representation
@@ -305,6 +305,7 @@ review:
     button: |
       **Name of the legal service provider or law school clinic:**
       ${ legal_service_provider }
+    show if: legal_service_representation == True
 
   - note: |
       <hr>

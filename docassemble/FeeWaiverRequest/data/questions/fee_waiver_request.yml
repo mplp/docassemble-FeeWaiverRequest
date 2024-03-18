@@ -2,9 +2,6 @@ include:
   - docassemble.mlhframeworkBH:mlh_interview_framework.yml  # TODO - remove BH
   - review.yml
   - docassemble.ALToolbox:al_income.yml
----
-modules:
-  - .fee_waiver_request
 
 ---
 # docassemble-level metadata
@@ -52,6 +49,10 @@ objects:
   - user_monthly_payments: ALSimpleValueList
 ---
 features:
+  # Per March '24 dev team discussion, we want the progress bar enabled for interviews.
+  # However, being that this interview block will someday be incorporated into other 
+  # tools, I decided not to use them here since the progress of this interview block will
+  # not be indicative of the progress of a greater interview. - bharrison
   progress bar: False
 ---
 sections:
@@ -67,9 +68,9 @@ sections:
 id: interview order fee waiver request
 mandatory: False
 code: |
-
   # Set the allowed courts for this interview
   allowed_courts = []
+  nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_info")
 
   # todo - delete - just for quicker testing
@@ -108,7 +109,6 @@ code: |
     pa_mdhhs_case_number = 'DHS1212'
 
   users[0].name.first
-
   court_type_selection
   county_choice
   if court_count > 1:
@@ -161,7 +161,7 @@ code: |
 
   nav.set_section("section_affidavit")
   if pa_received:
-    pa_food_assistance_program # just to trigger thte page with all the checkboxes
+    pa_food_assistance_program # just to trigger the page with all the checkboxes
     if pa_mdhhs or pa_other:
       if pa_mdhhs:
         pa_mdhhs_case_number
@@ -174,7 +174,7 @@ code: |
   else:
     check_for_indigency
   nav.set_section("section_final")
-  #MLH_standard_outro_pages
+
   interview_order_fee_waiver_request = True
 
 ---
@@ -206,8 +206,10 @@ comment: |
 mandatory: True
 code: |
   nav.set_section("section_intro")
-  #MLH_standard_intro_pages
+  MLH_standard_intro_pages
   interview_order_fee_waiver_request
+  nav.set_section("section_final")
+  MLH_standard_outro_pages
   signature_date
   # Store anonymous data for analytics / statistics
   store_variables_snapshot(
@@ -217,6 +219,7 @@ code: |
           "reached_interview_end": True,
       },
   )
+  set_progress(100)
   fee_waiver_request_download
 
 ---
@@ -802,7 +805,7 @@ subquestion: |
   Click the image to open it in a new tab. Click the "Edit answers" button
   to edit your answers.
 
-  ${ action_button_html(url_action('review_fee_waiver_request'), label='Edit answers', color='info') }
+  ${ action_button_html(url_action('review_full'), label='Edit answers', color='info') }
   
   Remember to come back to this window to continue and sign your form.
 continue button field: fee_waiver_request_preview_question
@@ -829,10 +832,9 @@ subquestion: |
   
   View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
 
-  ${ action_button_html(url_action('review_fee_waiver_request'), label='Edit answers', color='info') }
+  ${ action_button_html(url_action('review_full'), label='Edit answers', color='info') }
 
   ${ al_cover_bundle.download_list_html() }
-  
   ${ al_court_bundle.download_list_html(include_zip=False) }
   
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
@@ -874,11 +876,11 @@ objects:
       filename="fee_waiver_request_mc_20", enabled=True, has_addendum=True,
       default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
   - protected_pii_mc_97_attachment: >-
-      ALDocument.using(title="Protected PII - MC 97", 
-      filename="protected_pii_mc_97", has_addendum=False)
+      ALDocument.using(title="Protected Personal Identifying Information - MC 97", 
+      filename="Protected Personal Identifying Information - MC 97", has_addendum=False)
   - protected_pii_mc_97a_attachment: >-
-      ALDocument.using(title="Protected PII - MC 97a", 
-      filename="protected_pii_mc_97a", has_addendum=False)
+      ALDocument.using(title="Protected Personal Identifying Information - MC 97a", 
+      filename="Protected Personal Identifying Information - MC 97a", has_addendum=False)
 ---
 code: |
   protected_pii_mc_97_attachment.enabled = insert_mc_97
@@ -906,7 +908,7 @@ objects:
   - al_court_bundle: >-
       ALDocumentBundle.using(elements=[fee_waiver_attachment, protected_pii_mc_97_attachment,
       protected_pii_mc_97a_attachment], 
-      filename="fee_waiver_request_packet", title="All forms to deliver to court", enabled=pii_included)
+      filename="fee_waiver_request_packet", title="All forms to deliver to court")
 
 ---
 # Just a little block to set some PDF variables in one place that will be used
