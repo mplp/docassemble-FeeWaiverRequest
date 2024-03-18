@@ -45,12 +45,14 @@ code: |
   if plaintiffs[0].has_attorney:
     plaintiff_attorneys[0].bar_number
     plaintiff_attorneys[0].address.address
+    plaintiff_attorneys[0].no_phone_number
   recompute_plaintiff_attorney = True
 ---
 code: |
   if defendants[0].has_attorney:
     defendant_attorneys[0].bar_number
     defendant_attorneys[0].address.address
+    defendant_attorneys[0].no_phone_number
   recompute_defendant_attorney = True
 
 ---
@@ -156,7 +158,7 @@ review:
         
         ${ word("") if item.no_phone_number else item.phone_numbers() }
       % endfor
-      show if: case_type == 'Parties'
+    show if: case_type == 'Parties'
   - Edit: other_parties.revisit
     button: |
       **Other Party Information**
@@ -185,16 +187,16 @@ review:
     - plaintiff_attorneys[0].address.city
     - plaintiff_attorneys[0].address.state
     - plaintiff_attorneys[0].address.zip
-    - plaintiff_attorneys[0].phone_number
+    - plaintiff_attorneys[0].no_phone_number
     button: |
-      **Plaintiff's attorney:**
+      **${ plaintiffs[0].name.full() }'s attorney:**
 
       ${ plaintiff_attorneys[0].name.full() }
       ${ plaintiff_attorneys[0].bar_number }
       
       ${ plaintiff_attorneys[0].address.block() }
       
-      Phone: ${ phone_number_formatted(plaintiff_attorneys[0].phone_number) }
+      Phone: ${ word("None") if plaintiff_attorneys[0].no_phone_number else phone_number_formatted(plaintiff_attorneys[0].phone_number) }
     show if: case_type == 'Parties' and plaintiffs[0].has_attorney
   - Edit: 
     - defendants[0].has_attorney
@@ -211,16 +213,16 @@ review:
     - defendant_attorneys[0].address.city
     - defendant_attorneys[0].address.state
     - defendant_attorneys[0].address.zip
-    - defendant_attorneys[0].phone_number
+    - defendant_attorneys[0].no_phone_number
     button: |
-      **Defendant's attorney:**
+      **${ defendants[0].name.full() }'s attorney:**
       
       ${ defendant_attorneys[0].name.full() }
       ${ defendant_attorneys[0].bar_number }
       
       ${ defendant_attorneys[0].address.block() }
       
-      Phone: ${ phone_number_formatted(defendant_attorneys[0].phone_number) }
+      Phone: ${ word("None") if defendant_attorneys[0].no_phone_number else phone_number_formatted(defendant_attorneys[0].phone_number) }
     show if: case_type == 'Parties' and defendants[0].has_attorney
 
   - note: |
@@ -517,6 +519,8 @@ edit:
   - name.first
   - name.middle
   - name.last
+  - address.address
+  - no_phone_number
 confirm: True
 
 ---
@@ -539,6 +543,8 @@ edit:
   - name.first
   - name.middle
   - name.last
+  - address.address
+  - no_phone_number
 confirm: True
 
 ---
