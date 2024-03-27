@@ -1098,6 +1098,7 @@ attachment:
       - "in_the_matter_of": ${ in_the_matter_of }
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
+      - "today": ${ today() }
 
 ---
 attachment:
@@ -1120,3 +1121,4 @@ attachment:
       - "in_the_matter_of": ${ in_the_matter_of }
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
+      - "today": ${ today() }
