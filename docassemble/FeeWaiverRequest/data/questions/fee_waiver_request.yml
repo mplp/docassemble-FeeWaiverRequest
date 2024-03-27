@@ -477,7 +477,7 @@ question: What is your average gross household income?
 subquestion: |
   Gross income is all the money that you or any of your household members receive, including 
   pay from a job, Social Security, and unemployment, before any deductions. If the amount 
-  changes from week to week or month to month, use an average grosshousehold income.
+  changes from week to week or month to month, use your **average** gross household income.
 fields:
   - Amount: household_income
     datatype: currency
