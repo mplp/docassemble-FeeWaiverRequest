@@ -547,7 +547,7 @@ fields:
     hint: e.g, Ford, Honda
   - Model: x[i].model
     hint: e.g., Fusion, Civic
-  - Do you still own money on this vehicle? : x[i].balance_owed
+  - Do you still owe money on this vehicle? : x[i].balance_owed
     datatype: yesnoradio
   - Loan balance: x[i].balance
     datatype: currency
