@@ -290,7 +290,7 @@ question: Public Assistance
 subquestion: |
   Do you get public assistance that is **based on having low income**?
   
-  ***Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income, so if that is the only benefit that you receive, select No.*
+  **Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income, so if that is the only benefit that you receive, select **No**.
   
   ${ collapse_template(public_assistance_template) }
 fields:
