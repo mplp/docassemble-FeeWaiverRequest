@@ -469,6 +469,7 @@ subquestion: |
 fields:
   - no label: household_size
     datatype: integer
+    min: 1
 
 ---
 id: household income
