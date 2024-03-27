@@ -973,6 +973,7 @@ attachment:
   variable name: fee_waiver_attachment[i]
   skip undefined: False
   pdf template file: fee_waiver_request_mc_20.pdf
+  editable: False
   fields:
     - "trial_court_circuit": ${ trial_court_circuit }
     - "trial_court_district": ${ trial_court_district }
@@ -1082,6 +1083,7 @@ attachment:
   variable name: protected_pii_mc_97_attachment[i]
   skip undefined: True
   pdf template file: protected_pii_mc_97.pdf
+  editable: False
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
@@ -1103,6 +1105,7 @@ attachment:
   variable name: protected_pii_mc_97a_attachment[i]
   skip undefined: True
   pdf template file: protected_pii_mc_97a.pdf
+  editable: False
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
