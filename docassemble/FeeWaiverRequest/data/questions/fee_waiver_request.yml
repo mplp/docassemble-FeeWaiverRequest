@@ -1089,7 +1089,7 @@ attachment:
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
-      - "trial_court_county": ${ trial_court_county if court_type == 'probate' else '' }
+      - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
       - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
       - "trial_court_phone_number": ${ the_court.phone }
       - "docket_number": ${ docket_number }
@@ -1112,7 +1112,7 @@ attachment:
   fields:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
-      - "trial_court_county": ${ trial_court_county if court_type == 'probate' else ''}
+      - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
       - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
       - "trial_court_phone_number": ${ the_court.phone }
       - "docket_number": ${ docket_number }
