@@ -74,11 +74,59 @@ code: |
   recompute_obligations = True
 
 ---
+code: |
+  if user_ask_role == 'plaintiff':
+    plaintiffs.gather()
+    plaintiffs[0].address.address
+    plaintiffs[0].phone_number
+    if users[0].has_attorney:
+      plaintiff_attorneys[0].bar_number # will also get name
+      plaintiff_attorneys[0].address.address
+      plaintiff_attorneys[0].no_phone_number
+    defendants.gather()
+    defendants[0].address.address
+    defendants[0].phone_number
+    if defendants[0].has_attorney:
+      defendant_attorneys[0].bar_number # will also get name
+      defendant_attorneys[0].address.address
+      defendant_attorneys[0].no_phone_number
+  else:
+    defendants.gather()
+    defendants[0].address.address
+    defendants[0].phone_number
+    if users[0].has_attorney:
+      defendant_attorneys[0].bar_number # will also get name
+      defendant_attorneys[0].address.address
+      defendant_attorneys[0].no_phone_number
+    plaintiffs.gather()
+    plaintiffs[0].address.address
+    plaintiffs[0].phone_number
+    if plaintiffs[0].has_attorney:
+      plaintiff_attorneys[0].bar_number # will also get name
+      plaintiff_attorneys[0].address.address
+      plaintiff_attorneys[0].no_phone_number
+  recompute_parties = True
+
+---
 id: fee waiver request review screen
 event: review_full
 question: |
   Review your answers
 review:
+  - Edit:
+    - user_ask_role
+    - recompute:
+      - plaintiffs
+      - defendants
+      - users[0].has_attorney
+      - other_parties[0].has_attorney
+      - plaintiff_attorneys
+      - defendant_attorneys
+      - recompute_parties
+      # re-ask for plaintiffs if switching to defendant on last screen
+      #- force_regather_others
+    button: |
+      **You are a**: ${ user_ask_role }
   - note: |
       ### Case and Court Information
   - Edit: 

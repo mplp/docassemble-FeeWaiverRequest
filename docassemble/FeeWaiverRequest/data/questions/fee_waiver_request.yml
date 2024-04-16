@@ -52,14 +52,39 @@ features:
   # Per March '24 dev team discussion, we want the progress bar enabled for interviews.
   # However, being that this interview block will someday be incorporated into other 
   # tools, I decided not to use them here since the progress of this interview block will
-  # not be indicative of the progress of a greater interview. - bharrison
-  progress bar: False
+  # not be indicative of the progress of a parent interview. - bharrison
+  progress bar: True
+  #progress bar method: stepped
+  #progress bar multiplier: 0.02
+  show progress bar percentage: True
+  
+---
+mandatory: True
+code: |
+  progress_start = 0
+  progress_end = 100
+
+  progress_intro = progress_start
+  progress_basic = 10
+  progress_user = 20
+  progress_other_party = 30
+  progress_affidavit = 40
+  progress_pa = 50
+  progress_legal_rep = 50
+  progress_indigency = 55
+  progress_employment = 65
+  progress_assets = 70
+  progress_obligations = 80
+  progress_outro = 90
+  progress_done = progress_end
+
 ---
 sections:
   - section_intro: Introduction
   - section_info: Basic Information
   - section_affidavit: Affidavit Information
   - section_final: Final Instructions
+  - review_full: "✎ <u>Review / Edit</u>"
 
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
@@ -108,6 +133,7 @@ code: |
     pa_medicaid = True
     pa_mdhhs_case_number = 'DHS1212'
 
+  set_progress(progress_basic)
   users[0].name.first
   court_type_selection
   county_choice
@@ -124,6 +150,7 @@ code: |
   elif court_type == 'probate':
     case_type = 'Matter'
 
+  set_progress(progress_user)
   if case_type == 'Parties':
     if user_ask_role == 'plaintiff':
       plaintiffs.gather()
@@ -133,6 +160,7 @@ code: |
         plaintiff_attorneys[0].bar_number # will also get name
         plaintiff_attorneys[0].address.address
         plaintiff_attorneys[0].no_phone_number
+      set_progress(progress_other_party)
       defendants.gather()
       defendants[0].address.address
       defendants[0].phone_number
@@ -148,6 +176,7 @@ code: |
         defendant_attorneys[0].bar_number # will also get name
         defendant_attorneys[0].address.address
         defendant_attorneys[0].no_phone_number
+      set_progress(progress_other_party)
       plaintiffs.gather()
       plaintiffs[0].address.address
       plaintiffs[0].phone_number
@@ -159,8 +188,11 @@ code: |
     in_the_matter_of
   docket_number
 
+  set_progress(progress_affidavit)
+
   nav.set_section("section_affidavit")
   if pa_received:
+    set_progress(progress_pa)
     pa_food_assistance_program # just to trigger the page with all the checkboxes
     if pa_mdhhs or pa_other:
       if pa_mdhhs:
@@ -170,6 +202,7 @@ code: |
     elif pa_supplemental_security:
       pa_ssa_number
   elif legal_service_representation:
+    set_progress(progress_legal_rep)
     legal_service_provider
   else:
     check_for_indigency
@@ -179,17 +212,21 @@ code: |
 
 ---
 code: |
+  set_progress(progress_indigency)
   indigency_intro
   household_size
   household_income
+  set_progress(progress_employment)
   income_employment
   income_unemployment
+  set_progress(progress_assets)
   bank_account_balance
   if user_vehicles.there_are_any:
     user_vehicles.gather()
   if user_assets.there_are_any:
     assets_intro
     user_assets.gather()
+  set_progress(progress_obligations)
   expense_rent_amount
   expense_child_support
   if user_court_payments.there_are_any:
@@ -206,9 +243,11 @@ comment: |
 mandatory: True
 code: |
   nav.set_section("section_intro")
+  set_progress(progress_intro)
   MLH_standard_intro_pages
   interview_order_fee_waiver_request
   nav.set_section("section_final")
+  set_progress(progress_outro)
   MLH_standard_outro_pages
   signature_date
   # Store anonymous data for analytics / statistics
@@ -219,8 +258,9 @@ code: |
           "reached_interview_end": True,
       },
   )
-  set_progress(100)
+  set_progress(progress_done)
   fee_waiver_request_download
+  set_progress(progress_done)
 
 ---
 # Overrides standard landing page
