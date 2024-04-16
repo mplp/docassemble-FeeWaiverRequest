@@ -866,7 +866,7 @@ code: |
   addresses_to_search = [user.address for user in users.complete_elements()]
 
 ---
-id: download fee_waiver_request
+id: DownloadScreen
 event: fee_waiver_request_download
 question: |
   All done
