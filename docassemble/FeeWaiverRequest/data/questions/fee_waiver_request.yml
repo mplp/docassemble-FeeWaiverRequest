@@ -911,9 +911,6 @@ code: |
 ---
 # ALDocument objects specify the metadata for each template
 objects:
-#  - fee_waiver_instructions: >-
-#      ALDocument.using(title="Instructions", 
-#      filename="fee_waiver_request_next_steps.docx", enabled=True, has_addendum=False)
   - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
       filename="fee_waiver_request_mc_20", enabled=True, has_addendum=True,
@@ -1109,6 +1106,31 @@ attachment:
         % else:
         ${ '' }
         % endif
+
+---
+attachment:
+  variable name: fee_waiver_attachment.addendum
+  pdf template file: feewaiver_addendum_template.pdf
+  skip undefined: False
+  editable: False
+  fields:
+    - "trial_court_circuit": ${ trial_court_circuit }
+    - "trial_court_district": ${ trial_court_district }
+    - "trial_court_county": ${ trial_court_county }
+    - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
+    - "trial_court_phone_number": ${ the_court.phone }
+    - "docket_number": ${ docket_number }
+    - "in_the_matter_of": |
+        ${ in_the_matter_of if case_type == 'Matter' else '' }
+    - "plaintiffs_name": ${ plaintiffs_name }
+    - "defendants_name": ${ defendants_name }
+    - "overflow": |
+        % for field in fee_waiver_attachment.overflow():
+        ${ field.label }
+        ${ indent(single_to_double_newlines(field.overflow_value(preserve_newlines=True, overflow_message=fee_waiver_attachment.default_overflow_message))) }
+        
+        % endfor
+
 ---
 code: |
   fee_waiver_attachment.overflow_fields["assets_list"]._original_value = assets_list

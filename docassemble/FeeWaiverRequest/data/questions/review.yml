@@ -452,7 +452,7 @@ review:
 
   - note: |
       <hr>
-      ### Payment and Obligations
+      ### Payments and Obligations
     show if: unable_to_pay
   - Edit: 
     - expense_rent_amount
