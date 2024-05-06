@@ -1,5 +1,5 @@
 include:
-  - docassemble.mlhframeworkBH:mlh_interview_framework.yml  # TODO - remove BH
+  - docassemble.mlhframework:mlh_interview_framework.yml
   - review.yml
   - docassemble.ALToolbox:al_income.yml
 
