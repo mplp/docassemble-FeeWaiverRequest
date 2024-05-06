@@ -434,9 +434,10 @@ subquestion: |
 
   **Do not include your Social Security number.** 
   If your case number has a Social Security number in it, **do not** enter it here. 
-  If you get Supplemental Security Income (SSI), click ${MLH_back_button_label} and select that option so that this tool can fill your case number on a separate protected form to file with the court. 
-  Other kinds of Social Security benefits are not based on having low income and do not qualify you for a fee waiver. 
-  To select a different kind of benefit, click the ${MLH_back_button_label} button.
+  
+  If you get Supplemental Security Income (SSI), click **< ${MLH_back_button_label}** and select that option so that this tool can fill your case number on a separate protected form to file with the court. Other kinds of Social Security benefits are not based on having low income and do not qualify you for a fee waiver. 
+  
+  To select a different kind of benefit, click the **< ${MLH_back_button_label}** button.
 fields:
   - "Type(s) of assistance": pa_other_types
     maxlength: 49
