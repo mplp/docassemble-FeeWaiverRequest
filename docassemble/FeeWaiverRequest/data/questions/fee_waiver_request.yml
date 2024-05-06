@@ -258,6 +258,16 @@ fields:
     choices:
       - Plaintiff/Petitioner: plaintiff
       - Defendant/Respondent: defendant
+  - note: |
+      ${ collapse_template(help_user_ask_role_template) }
+---
+template: help_user_ask_role_template
+subject: |
+  How do I know?
+content: |
+  If you’re the one starting the case, you’re the Plaintiff or Petitioner. If you have been served with court papers and/or are responding to a case someone else filed, you’re the Defendant or Respondent.
+  
+  Plaintiff and Defendant are used for many cases, but Petitioner and Respondent are sometimes used. If you have other papers from this case, look at them to see which one you are.
 
 ---
 reconsider: True
