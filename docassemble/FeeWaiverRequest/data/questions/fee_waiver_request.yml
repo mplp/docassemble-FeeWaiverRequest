@@ -98,41 +98,6 @@ code: |
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_info")
 
-  # todo - delete - just for quicker testing
-  if False:
-    users[0].name.first = 'Brett'
-    users[0].name.last = 'Harrison'
-    #users[0].address.address = '502 E White'
-    users[0].address.unit = ''
-    users[0].address.city = 'Trinidad'
-    users[0].address.state = 'CA'
-    users[0].address.zip = '81082'
-    #users[0].phone_number = '7757229432'
-    #users[0].no_phone_number = False
-    other_parties[0].person_or_business = 'person'
-    other_parties[0].name.first = 'Jerk'
-    other_parties[0].name.last = 'Face'
-    #other_parties[0].address.address = '100 Loser Lane'
-    other_parties[0].address.unit = ''
-    other_parties[0].address.city = 'Loserville'
-    other_parties[0].address.state = 'LA'
-    other_parties[0].address.zip = '77777'
-    #other_parties[0].no_phone_number = False
-    #other_parties[0].phone_number = '3036667777'
-    users[0].has_attorney = False
-    other_parties[0].has_attorney = False
-    #court_type = 'circuit'
-    #case_type = 'Parties'
-    user_ask_role = 'plaintiff'
-    docket_number = 'C1212'
-    #user_assets.there_are_any = False
-    #user_court_payments.there_are_any = False
-    user_monthly_payments.there_are_any = False
-    MLH_esign = True
-    pa_received = True
-    pa_medicaid = True
-    pa_mdhhs_case_number = 'DHS1212'
-
   set_progress(progress_basic)
   users[0].name.first
   court_type_selection
