@@ -1048,7 +1048,7 @@ attachment:
     - "legal_service_provider": |
         ${ legal_service_provider if not pa_received and legal_service_representation else '' }
     - "unable_to_pay": ${ unable_to_pay }
-    - "household_income": ${ household_income if unable_to_pay else '' }
+    - "household_income": ${ '%.2f' % household_income if unable_to_pay else '' }
     - "household_income_period": ${ household_income_period if unable_to_pay else '' }
     - "household_size": ${ household_size if unable_to_pay else '' }
     - "household_income_sources": |
