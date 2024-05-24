@@ -899,7 +899,7 @@ code: |
 objects:
   - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
-      filename="fee_waiver_request_mc_20", enabled=True, has_addendum=True,
+      filename="Fee Waiver Request - MC 20", enabled=True, has_addendum=True,
       default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
   - protected_pii_mc_97_attachment: >-
       ALDocument.using(title="Protected Personal Identifying Information - MC 97", 
