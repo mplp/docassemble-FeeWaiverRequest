@@ -113,20 +113,6 @@ event: review_full
 question: |
   Review your answers
 review:
-  - Edit:
-    - user_ask_role
-    - recompute:
-      - plaintiffs
-      - defendants
-      - users[0].has_attorney
-      - other_parties[0].has_attorney
-      - plaintiff_attorneys
-      - defendant_attorneys
-      - recompute_parties
-      # re-ask for plaintiffs if switching to defendant on last screen
-      #- force_regather_others
-    button: |
-      **You are a**: ${ user_ask_role }
   - note: |
       ### Case and Court Information
   - Edit: 
@@ -169,6 +155,20 @@ review:
       **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**
       ${ word(yesno(case_type=='Parties')) }
     show if: court_type == 'circuit'
+  - Edit:
+    - user_ask_role
+    - recompute:
+      - plaintiffs
+      - defendants
+      - users[0].has_attorney
+      - other_parties[0].has_attorney
+      - plaintiff_attorneys
+      - defendant_attorneys
+      - recompute_parties
+      # re-ask for plaintiffs if switching to defendant on last screen
+      #- force_regather_others
+    button: |
+      **You are a**: ${ user_ask_role }
   - Edit: trial_court_circuit
     button: |
       **Circuit:**

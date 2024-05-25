@@ -114,6 +114,7 @@ code: |
   else:
   # This means there is only one court of this type for this county.
     court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  the_court
 
   if court_type == 'circuit':
     case_type
