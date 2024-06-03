@@ -1114,7 +1114,7 @@ attachment:
     - "overflow": |
         % for field in fee_waiver_attachment.overflow():
         ${ field.label }
-        ${ indent(single_to_double_newlines(field.overflow_value(preserve_newlines=True, overflow_message=fee_waiver_attachment.default_overflow_message))) }
+        ${ indent(field.overflow_value(overflow_message=fee_waiver_attachment.default_overflow_message)) }
         
         % endfor
 
