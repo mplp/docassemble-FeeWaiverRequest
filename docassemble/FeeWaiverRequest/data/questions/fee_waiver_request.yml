@@ -27,7 +27,7 @@ metadata:
 id: interview config code block
 initial: True
 code: |
-  github_repo_name =  'docassemble-FeeWaiverRequest'
+  github_repo_name = 'docassemble-FeeWaiverRequest' if get_config('debug') else 'docassemble-UserFeedback'
   # al_form_type = "existing_case" 
   MLH_instructions_included = True
   MLH_court_forms = True
