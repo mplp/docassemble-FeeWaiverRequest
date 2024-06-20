@@ -108,6 +108,32 @@ code: |
   recompute_parties = True
 
 ---
+code: |
+  if court_type == 'circuit':
+    collect_case_type
+    if case_type == 'Parties':
+      user_ask_role
+      collect_party_info
+    else:
+      in_the_matter_of
+  elif court_type == 'district':
+    case_type = "Parties"
+    collect_party_info
+  elif court_type == 'probate':
+    case_type = 'Matter'
+    in_the_matter_of
+  recompute_court_type = True
+
+---
+code: |
+  if case_type == 'Parties':
+    user_ask_role
+    collect_party_info
+  else:
+    in_the_matter_of
+  recompute_case_info = True
+
+---
 id: fee waiver request review screen
 event: review_full
 question: |
@@ -115,18 +141,16 @@ question: |
 review:
   - note: |
       ### Case and Court Information
+
   - Edit: 
     - court_type
     - county_choice
-    #- court_index
-    #- court_index_for_specific_court_type
-    # TODO - get these changes to work... 
     - recompute:
       - the_court
       - recompute_court
       - court_index
       - court_count
-      #- court_index_for_specific_court_type  # this actually deletes it, but does re-ask it...
+      - recompute_court_type
     button: |
       **Court Information**
       
@@ -150,7 +174,10 @@ review:
       
       ${ the_court.number } (${ the_court.name })
     show if: court_count > 1
-  - Edit: case_type
+  - Edit: 
+    - case_type
+    - recompute:
+      - recompute_case_info
     button: |
       **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**
       ${ word(yesno(case_type=='Parties')) }
@@ -165,22 +192,14 @@ review:
       - plaintiff_attorneys
       - defendant_attorneys
       - recompute_parties
-      # re-ask for plaintiffs if switching to defendant on last screen
-      #- force_regather_others
     button: |
       **You are a**: ${ user_ask_role }
+    show if: case_type == 'Parties'
   - Edit: trial_court_circuit
     button: |
       **Circuit:**
       ${ trial_court_circuit }
     show if: court_type == 'circuit'
-  - Edit: trial_court_district
-    button: |
-      **District:**
-      Test:
-      ${ trial_court_district }
-      Test 2:
-    show if: court_type == 'district'
   - Edit: docket_number
     button: |
       **Docket number:**
@@ -253,6 +272,7 @@ review:
     button: |
       **${ defendants[0].name.full() } has attorney?**
       ${ word(yesno(defendants[0].has_attorney)) }
+    show if: case_type == 'Parties'
   - Edit: 
     - defendant_attorneys[0].bar_number
     - defendant_attorneys[0].name.first

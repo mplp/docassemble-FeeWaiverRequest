@@ -125,38 +125,7 @@ code: |
 
   set_progress(progress_user)
   if case_type == 'Parties':
-    if user_ask_role == 'plaintiff':
-      plaintiffs.gather()
-      plaintiffs[0].address.address
-      plaintiffs[0].phone_number
-      if users[0].has_attorney:
-        plaintiff_attorneys[0].bar_number # will also get name
-        plaintiff_attorneys[0].address.address
-        plaintiff_attorneys[0].no_phone_number
-      set_progress(progress_other_party)
-      defendants.gather()
-      defendants[0].address.address
-      defendants[0].phone_number
-      if defendants[0].has_attorney:
-        defendant_attorneys[0].bar_number # will also get name
-        defendant_attorneys[0].address.address
-        defendant_attorneys[0].no_phone_number
-    else:
-      defendants.gather()
-      defendants[0].address.address
-      defendants[0].phone_number
-      if users[0].has_attorney:
-        defendant_attorneys[0].bar_number # will also get name
-        defendant_attorneys[0].address.address
-        defendant_attorneys[0].no_phone_number
-      set_progress(progress_other_party)
-      plaintiffs.gather()
-      plaintiffs[0].address.address
-      plaintiffs[0].phone_number
-      if plaintiffs[0].has_attorney:
-        plaintiff_attorneys[0].bar_number # will also get name
-        plaintiff_attorneys[0].address.address
-        plaintiff_attorneys[0].no_phone_number
+    collect_party_info
   elif case_type == 'Matter':
     in_the_matter_of
   docket_number
@@ -183,6 +152,43 @@ code: |
 
   interview_order_fee_waiver_request = True
 
+---
+# Separated into separate block so it can be called from review. 
+code: |
+  if user_ask_role == 'plaintiff':
+    plaintiffs.gather()
+    plaintiffs[0].address.address
+    plaintiffs[0].phone_number
+    if users[0].has_attorney:
+      plaintiff_attorneys[0].bar_number # will also get name
+      plaintiff_attorneys[0].address.address
+      plaintiff_attorneys[0].no_phone_number
+    set_progress(progress_other_party)
+    defendants.gather()
+    defendants[0].address.address
+    defendants[0].phone_number
+    if defendants[0].has_attorney:
+      defendant_attorneys[0].bar_number # will also get name
+      defendant_attorneys[0].address.address
+      defendant_attorneys[0].no_phone_number
+  else:
+    defendants.gather()
+    defendants[0].address.address
+    defendants[0].phone_number
+    if users[0].has_attorney:
+      defendant_attorneys[0].bar_number # will also get name
+      defendant_attorneys[0].address.address
+      defendant_attorneys[0].no_phone_number
+    set_progress(progress_other_party)
+    plaintiffs.gather()
+    plaintiffs[0].address.address
+    plaintiffs[0].phone_number
+    if plaintiffs[0].has_attorney:
+      plaintiff_attorneys[0].bar_number # will also get name
+      plaintiff_attorneys[0].address.address
+      plaintiff_attorneys[0].no_phone_number
+
+  collect_party_info = True
 ---
 code: |
   set_progress(progress_indigency)
@@ -256,6 +262,8 @@ fields:
     choices:
       - Yes: Parties
       - No: Matter
+# continue butotn field exists for review functionality
+continue button field: collect_case_type
 
 ---
 id: user role
