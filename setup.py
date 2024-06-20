@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.FeeWaiverRequest',
-      version='0.2',
+      version='0.3',
       description=('Fee Waiver Request'),
       long_description='# docassemble.FeeWaiverRequestMc20\r\n\r\nFee Waiver Request\r\n\r\n## Author\r\n\r\nSept 2023   New, from Suffolk Weaver. Brett Harrison of Maverick & Mitchell LLC\r\n\r\n',
       long_description_content_type='text/markdown',

@@ -221,6 +221,13 @@ comment: |
   Delete mandatory: True to include in another interview
 mandatory: True
 code: |
+  store_variables_snapshot(
+      key='intro',
+      persistent=True,
+      data={
+          "snap_time": str(current_datetime().format_datetime()),
+          },
+      )  
   nav.set_section("section_intro")
   set_progress(progress_intro)
   MLH_standard_intro_pages
@@ -230,14 +237,27 @@ code: |
   MLH_form_type = "forms" if insert_pii_form else "form"
   MLH_standard_outro_pages
   signature_date
+
   # Store anonymous data for analytics / statistics
-  store_variables_snapshot(
+  if case_type == 'Parties':
+    store_variables_snapshot(
+      key='final',
       persistent=True,
       data={
-          "zip": showifdef("users[0].address.zip"),
-          "reached_interview_end": True,
-      },
-  )
+        "zip": users[0].address.zip,
+        "number_of_forms": len(al_court_bundle.enabled_documents()),
+        "snap_time": str(current_datetime().format_datetime()),
+        },
+      )
+  else:
+    store_variables_snapshot(
+      key='final',
+      persistent=True,
+      data={
+        "number_of_forms": len(al_court_bundle.enabled_documents()),
+        "snap_time": str(current_datetime().format_datetime()),
+        },
+      )
   set_progress(progress_done)
   fee_waiver_request_download
   set_progress(progress_done)
