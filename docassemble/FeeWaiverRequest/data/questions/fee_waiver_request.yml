@@ -39,8 +39,8 @@ code: |
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
-  accessible_instructions_link = "https://michiganlegalhelp.org/node/2066"
-  resource_page_link = "https://michiganlegalhelp.org/node/10945"
+  accessible_instructions_link = "[https://michiganlegalhelp.org/node/2066](https://michiganlegalhelp.org/node/2066)"
+  resource_page_link = "[https://michiganlegalhelp.org/node/10945](https://michiganlegalhelp.org/node/10945)"
   cover_sheet_select_county = ""
 
 ---
