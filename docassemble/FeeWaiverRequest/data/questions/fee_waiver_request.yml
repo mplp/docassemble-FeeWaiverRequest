@@ -39,8 +39,8 @@ code: |
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
-  accessible_instructions_link = "https://michiganlegalhelp.org/node/2066"
-  resource_page_link = "https://michiganlegalhelp.org/node/10945"
+  accessible_instructions_link = "[https://michiganlegalhelp.org/node/2066](https://michiganlegalhelp.org/node/2066)"
+  resource_page_link = "[https://michiganlegalhelp.org/node/10945](https://michiganlegalhelp.org/node/10945)"
   cover_sheet_select_county = ""
 
 ---
@@ -106,7 +106,6 @@ mandatory: False
 code: |
   # Set the allowed courts for this interview
   allowed_courts = []
-  nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_info")
 
   set_progress(progress_basic)
@@ -232,6 +231,7 @@ code: |
           "snap_time": str(current_datetime().format_datetime()),
           },
       )  
+  nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
   set_progress(progress_intro)
   MLH_standard_intro_pages
@@ -490,18 +490,16 @@ fields:
 id: legal assistance received
 question: |
   Legal Assistance
-subquestion: |
-  Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?
 fields:
-  - no label: legal_service_representation
+  - Are you represented by a legal services program, or do you receive assistance from a law school clinic due to low income?: legal_service_representation
+    label above field: True
     datatype: yesnoradio
 ---
 id: legal assistance provider
 question: Legal Assistance Provider
-subquestion: |
-  What is the name of the legal services program or law school clinic you are getting help from?
 fields:
-  - no label: legal_service_provider
+  - What is the name of the legal services program or law school clinic you are getting help from?: legal_service_provider
+    label above field: True
     maxlength: 84
 
 ---
@@ -690,10 +688,9 @@ fields:
 ---
 id: monthly child support
 question: Child Support
-subquestion: |
-  Do you pay court-ordered child support?
 fields:
-  - no label: expense_child_support
+  - Do you pay court-ordered child support?: expense_child_support
+    label above field: True
     datatype: yesnoradio
   - Amount per month: expense_child_support_amount
     show if: expense_child_support
