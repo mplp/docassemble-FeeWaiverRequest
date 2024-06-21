@@ -106,7 +106,6 @@ mandatory: False
 code: |
   # Set the allowed courts for this interview
   allowed_courts = []
-  nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_info")
 
   set_progress(progress_basic)
@@ -232,6 +231,7 @@ code: |
           "snap_time": str(current_datetime().format_datetime()),
           },
       )  
+  nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
   set_progress(progress_intro)
   MLH_standard_intro_pages
