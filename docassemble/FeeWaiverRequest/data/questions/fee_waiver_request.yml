@@ -27,7 +27,10 @@ metadata:
 id: interview config code block
 initial: True
 code: |
-  github_repo_name = 'docassemble-FeeWaiverRequest' if get_config('debug') else 'docassemble-UserFeedback'
+  # TODO: switch this out prior to going live. Just to keep the repo specific to fee waiver
+  # while testing internally. - bharrison
+  #github_repo_name = 'docassemble-FeeWaiverRequest' if get_config('debug') else 'docassemble-UserFeedback'
+  github_repo_name 'docassemble-FeeWaiverRequest'
   # al_form_type = "existing_case" 
   MLH_instructions_included = True
   MLH_court_forms = True
