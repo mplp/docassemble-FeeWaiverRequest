@@ -56,33 +56,34 @@ objects:
   - user_monthly_payments: ALSimpleValueList
 ---
 features:
-  # Per March '24 dev team discussion, we want the progress bar enabled for interviews.
-  # However, being that this interview block will someday be incorporated into other 
-  # tools, I decided not to use them here since the progress of this interview block will
-  # not be indicative of the progress of a parent interview. - bharrison
   progress bar: True
   #progress bar method: stepped
   #progress bar multiplier: 0.02
-  show progress bar percentage: True
-  
+  #show progress bar percentage: True
 ---
 mandatory: True
 code: |
-  progress_start = 0
+  # The intention behind these was for hopeful-forward-thinking of when this code may
+  # be incorporated within another tool. In such a case, the start and end wouldn't be 
+  # 0 and 100. The fee waiver portion might appear at the very end of a long interview, 
+  # so the start and end might be 85 and 95, respectively. The variables below therefore
+  # represent a proportion of the total interview (i.e. end - start).
+  progress_start = 50
   progress_end = 100
+  progress_span = (progress_end - progress_start) / 100
 
   progress_intro = progress_start
-  progress_basic = 10
-  progress_user = 20
-  progress_other_party = 30
-  progress_affidavit = 40
-  progress_pa = 50
-  progress_legal_rep = 50
-  progress_indigency = 55
-  progress_employment = 65
-  progress_assets = 70
-  progress_obligations = 80
-  progress_outro = 90
+  progress_basic = progress_start + 10 * progress_span
+  progress_user = progress_start + 20 * progress_span
+  progress_other_party = progress_start + 30 * progress_span
+  progress_affidavit = progress_start + 40 * progress_span
+  progress_pa = progress_start + 50 * progress_span
+  progress_legal_rep = progress_start + 50 * progress_span
+  progress_indigency = progress_start + 55 * progress_span
+  progress_employment = progress_start + 65 * progress_span
+  progress_assets = progress_start + 70 * progress_span
+  progress_obligations = progress_start + 80 * progress_span
+  progress_outro = progress_start + 90 * progress_span
   progress_done = progress_end
 
 ---
@@ -249,6 +250,8 @@ code: |
         "snap_time": str(current_datetime().format_datetime()),
         },
       )
+  # Same as above, but without the zip code (user address is not collected on this
+  # path - no need to collect it just for stats).
   else:
     store_variables_snapshot(
       key='final',
@@ -261,15 +264,6 @@ code: |
   set_progress(progress_done)
   fee_waiver_request_download
   set_progress(progress_done)
-
----
-# Overrides standard landing page
-id: MLH intro landing
-continue button field: MLH_intro_landingg
-question: |
-  Welcome to ${ AL_ORGANIZATION_TITLE }’s ${ MLH_interview_short_title } tool.
-subquestion: |
-  This tool will help you prepare a *Fee Waiver Request*. When you are finished, return to the [Michigan Legal Help website](http://michiganlegalhelp.org) for information on what to do next. File this form in the court where your case will be or is pending.
 
 ---
 id: case type
