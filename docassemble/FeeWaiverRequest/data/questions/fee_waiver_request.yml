@@ -71,7 +71,7 @@ code: |
   # 0 and 100. The fee waiver portion might appear at the very end of a long interview, 
   # so the start and end might be 85 and 95, respectively. The variables below therefore
   # represent a proportion of the total interview (i.e. end - start).
-  progress_start = 50
+  progress_start = 0
   progress_end = 100
   progress_span = (progress_end - progress_start) / 100
 
