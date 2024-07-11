@@ -146,6 +146,9 @@ code: |
         pa_other_types
     elif pa_supplemental_security:
       pa_ssa_number
+  elif case_type == 'Parties' and users[0].has_attorney == False:
+    legal_service_representation = False
+    check_for_indigency
   elif legal_service_representation:
     set_progress(progress_legal_rep)
     legal_service_provider
