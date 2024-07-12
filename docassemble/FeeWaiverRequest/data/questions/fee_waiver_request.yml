@@ -289,14 +289,14 @@ continue button field: collect_case_type
 id: user role
 question: |
   What party are you in the court case?
+subquestion: |
+  ${ collapse_template(help_user_ask_role_template) }
 fields:
   - Your role: user_ask_role
     input type: radio
     choices:
       - Plaintiff/Petitioner: plaintiff
       - Defendant/Respondent: defendant
-  - note: |
-      ${ collapse_template(help_user_ask_role_template) }
 ---
 template: help_user_ask_role_template
 subject: |
