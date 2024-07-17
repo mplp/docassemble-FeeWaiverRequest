@@ -42,7 +42,6 @@ code: |
   accessible_instructions_link = "[https://michiganlegalhelp.org/node/2066](https://michiganlegalhelp.org/node/2066)"
   resource_page_link = "[https://michiganlegalhelp.org/node/10945](https://michiganlegalhelp.org/node/10945)"
   cover_sheet_select_county = ""
-
 ---
 code: |
   MLH_multiple_forms = insert_pii_form
@@ -197,6 +196,7 @@ code: |
   collect_party_info = True
 ---
 code: |
+  unable_to_pay  # to force this to calculate and thus trigger review screen accordion
   set_progress(progress_indigency)
   indigency_intro
   household_size
@@ -234,6 +234,7 @@ code: |
           "snap_time": str(current_datetime().format_datetime()),
           },
       )  
+  #review_screen_prep
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
   set_progress(progress_intro)
@@ -559,6 +560,8 @@ fields:
 ---
 id: bank account balance
 question: Bank Account Balance
+subquestion: |
+  unable: ${ unable_to_pay }
 fields:
   - What is the total amount of money in your bank accounts?: bank_account_balance
     label above field: true

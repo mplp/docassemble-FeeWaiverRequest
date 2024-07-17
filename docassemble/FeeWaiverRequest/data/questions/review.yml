@@ -140,8 +140,14 @@ question: |
   Review your answers
 review:
   - note: |
-      ### Case and Court Information
-
+      % if defined('court_type'):
+      ${ review_accordion_explainer }
+      % else:
+      ${ review_empty_explainer }
+      % endif
+  - raw html: |
+      ${ start_accordion('<h2 class="h5">Case and Court Information</h2>') }
+    show if: defined('court_type')
   - Edit: 
     - court_type
     - county_choice
@@ -210,9 +216,8 @@ review:
       ${ in_the_matter_of }
     show if: case_type == 'Matter'
     
-  - note: |
-      <hr>
-      ### Parties and Attorneys
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Parties and Attorneys</h2>') }
     show if: case_type == 'Parties'
   - Edit: users.revisit
     button: |
@@ -293,9 +298,9 @@ review:
       Phone: ${ word("None") if defendant_attorneys[0].no_phone_number else phone_number_formatted(defendant_attorneys[0].phone_number) }
     show if: case_type == 'Parties' and defendants[0].has_attorney
 
-  - note: |
-      <hr>
-      ### Public Assistance
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Public Assistance</h2>') }
+    show if: defined('pa_received')
   - Edit:
     - pa_received
     - pa_food_assistance_program
@@ -357,9 +362,8 @@ review:
       ${ pa_ssa_number }
     show if: pa_supplemental_security == True and pa_mdhhs != True
 
-  - note: |
-      <hr>
-      ### Legal Service Representation
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Legal Service Representation</h2>') }
     show if: pa_received == False
   - Edit: 
     - legal_service_representation
@@ -377,9 +381,8 @@ review:
       ${ legal_service_provider }
     show if: legal_service_representation == True
 
-  - note: |
-      <hr>
-      ### Household Information
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Household Information</h2>') }
     show if: unable_to_pay
   - Edit: household_size
     button: |
@@ -407,9 +410,8 @@ review:
       ${ word(yesno(income_unemployment)) }
     show if: unable_to_pay
 
-  - note: |
-      <hr>
-      ### Assets
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Assets</h2>') }
     show if: unable_to_pay
   - Edit: 
     - bank_account_balance
@@ -470,9 +472,8 @@ review:
       % endfor
     show if: unable_to_pay and user_assets.there_are_any
 
-  - note: |
-      <hr>
-      ### Payments and Obligations
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Payments and Obligations</h2>') }
     show if: unable_to_pay
   - Edit: 
     - expense_rent_amount
@@ -549,13 +550,15 @@ review:
       % endfor
     show if: unable_to_pay and user_monthly_payments.there_are_any
 
-  - note: |
-      <hr>
-      ### Electronic Signature
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Electronic Signature</h2>') }
+    show if: defined('MLH_esign')
   - Edit: MLH_esign
     button: |
       **Include your electronic signature on forms?**
       ${ word(yesno(MLH_esign)) }
+  - raw html: |
+      ${ end_accordion() }
 
 ---
 reconsider: True
