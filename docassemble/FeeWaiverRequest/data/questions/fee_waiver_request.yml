@@ -232,9 +232,10 @@ code: |
         key='intro',
         persistent=True,
         data={
-            "snap_time": str(current_datetime().format_datetime()),
+            "begin_time": str(current_datetime().format_datetime()),
         },
     )  
+    start_time
     mark_task_as_performed('intro_stored')
   #review_screen_prep
   nav.set_section('review_full') # to ensure this shows from beginning
@@ -254,7 +255,8 @@ code: |
       key='final',
       persistent=True,
       data={
-        "snap_time": str(current_datetime().format_datetime()),
+        "begin_time": start_time,
+        "end_time": str(current_datetime().format_datetime()),
         "zip": users[0].address.zip,
         "number_of_forms": len(al_court_bundle.enabled_documents()),
         },
@@ -266,7 +268,8 @@ code: |
       key='final',
       persistent=True,
       data={
-        "snap_time": str(current_datetime().format_datetime()),
+        "begin_time": start_time,
+        "end_time": str(current_datetime().format_datetime()),
         "number_of_forms": len(al_court_bundle.enabled_documents()),
         },
       )
@@ -311,6 +314,9 @@ content: |
 
   ${ image_plaintiff_or_defendant.show(width="100%") }
 
+---
+code: |
+  start_time = str(current_datetime().format_datetime())
 ---
 reconsider: True
 code: |
