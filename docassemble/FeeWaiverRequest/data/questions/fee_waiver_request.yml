@@ -231,6 +231,9 @@ code: |
     store_variables_snapshot(
         key='intro',
         persistent=True,
+        data={
+            "snap_time": str(current_datetime().format_datetime()),
+        },
     )  
     mark_task_as_performed('intro_stored')
   #review_screen_prep
