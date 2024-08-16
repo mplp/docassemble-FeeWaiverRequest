@@ -227,13 +227,12 @@ comment: |
   Delete mandatory: True to include in another interview
 mandatory: True
 code: |
-  store_variables_snapshot(
-      key='intro',
-      persistent=True,
-      data={
-          "snap_time": str(current_datetime().format_datetime()),
-          },
-      )  
+  if task_not_yet_performed('intro_stored'):
+    store_variables_snapshot(
+        key='intro',
+        persistent=True,
+    )  
+    mark_task_as_performed('intro_stored')
   #review_screen_prep
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
@@ -254,7 +253,6 @@ code: |
       data={
         "zip": users[0].address.zip,
         "number_of_forms": len(al_court_bundle.enabled_documents()),
-        "snap_time": str(current_datetime().format_datetime()),
         },
       )
   # Same as above, but without the zip code (user address is not collected on this
@@ -265,7 +263,6 @@ code: |
       persistent=True,
       data={
         "number_of_forms": len(al_court_bundle.enabled_documents()),
-        "snap_time": str(current_datetime().format_datetime()),
         },
       )
   set_progress(progress_done)
