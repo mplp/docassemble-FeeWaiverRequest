@@ -254,6 +254,7 @@ code: |
       key='final',
       persistent=True,
       data={
+        "snap_time": str(current_datetime().format_datetime()),
         "zip": users[0].address.zip,
         "number_of_forms": len(al_court_bundle.enabled_documents()),
         },
@@ -265,6 +266,7 @@ code: |
       key='final',
       persistent=True,
       data={
+        "snap_time": str(current_datetime().format_datetime()),
         "number_of_forms": len(al_court_bundle.enabled_documents()),
         },
       )
