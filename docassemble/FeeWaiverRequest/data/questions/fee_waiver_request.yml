@@ -85,7 +85,7 @@ code: |
   progress_employment = progress_start + 65 * progress_span
   progress_assets = progress_start + 70 * progress_span
   progress_obligations = progress_start + 80 * progress_span
-  progress_outro = progress_start + 90 * progress_span
+  progress_outro = progress_start + 95 * progress_span
   progress_done = progress_end
 
 ---
