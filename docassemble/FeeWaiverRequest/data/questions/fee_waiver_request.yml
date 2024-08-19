@@ -227,16 +227,7 @@ comment: |
   Delete mandatory: True to include in another interview
 mandatory: True
 code: |
-  if task_not_yet_performed('intro_stored'):
-    store_variables_snapshot(
-        key='intro',
-        persistent=True,
-        data={
-            "begin_time": str(current_datetime().format_datetime()),
-        },
-    )  
-    start_time
-    mark_task_as_performed('intro_stored')
+  snapshot_start
   #review_screen_prep
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
@@ -250,33 +241,38 @@ code: |
   signature_date
 
   # Store anonymous data for analytics / statistics
-  if case_type == 'Parties':
-    store_variables_snapshot(
-      key='final',
-      persistent=True,
-      data={
-        "begin_time": start_time,
-        "end_time": str(current_datetime().format_datetime()),
-        "zip": users[0].address.zip,
-        "number_of_forms": len(al_court_bundle.enabled_documents()),
-        },
-      )
-  # Same as above, but without the zip code (user address is not collected on this
-  # path - no need to collect it just for stats).
-  else:
-    store_variables_snapshot(
-      key='final',
-      persistent=True,
-      data={
-        "begin_time": start_time,
-        "end_time": str(current_datetime().format_datetime()),
-        "number_of_forms": len(al_court_bundle.enabled_documents()),
-        },
-      )
+  snapshot_download
+  
   set_progress(progress_done)
   fee_waiver_request_download
   set_progress(progress_done)
-
+---
+code: |
+  store_variables_snapshot(
+  	data=stuff_to_snapshot, persistent=True
+  	)
+  snapshot_interview_state = True
+---
+code: |
+  stuff_to_snapshot = {
+  	'begin_time': str(current_datetime().format_datetime()),
+  	}
+  snapshot_interview_state
+  snapshot_start = True  
+---
+code: |
+  snapshot_dv_question = False
+  # if the interview asks whether there's DV present, set the below to be True if dv is present, False if not.
+  # snapshot_dv_present = ??
+---
+code: |
+  stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
+  stuff_to_snapshot['number_of_forms'] = len(al_court_bundle.enabled_documents())
+  stuff_to_snapshot['end_time'] = str(current_datetime().format_datetime())
+  if snapshot_dv_question == True:
+    stuff_to_snapshot['dv_present'] = showifdef('snapshot_dv_present')
+  reconsider('snapshot_interview_state')
+  snapshot_download = True
 ---
 id: case type
 question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
@@ -314,9 +310,6 @@ content: |
 
   ${ image_plaintiff_or_defendant.show(width="100%") }
 
----
-code: |
-  start_time = str(current_datetime().format_datetime())
 ---
 reconsider: True
 code: |
