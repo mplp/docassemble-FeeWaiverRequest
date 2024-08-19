@@ -255,7 +255,7 @@ code: |
 ---
 code: |
   stuff_to_snapshot = {
-  	'begin_time': str(current_datetime().format_datetime()),
+  	'begin_time': str(current_datetime().format_datetime(format='yyyy-MM-dd h:mm a')),
   	}
   snapshot_interview_state
   snapshot_start = True  
@@ -268,7 +268,7 @@ code: |
 code: |
   stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
   stuff_to_snapshot['number_of_forms'] = len(al_court_bundle.enabled_documents())
-  stuff_to_snapshot['end_time'] = str(current_datetime().format_datetime())
+  stuff_to_snapshot['end_time'] = str(current_datetime().format_datetime(format='yyyy-MM-dd h:mm a'))
   if snapshot_dv_question == True:
     stuff_to_snapshot['dv_present'] = showifdef('snapshot_dv_present')
   reconsider('snapshot_interview_state')
