@@ -559,6 +559,7 @@ review:
       ${ word(yesno(MLH_esign)) }
   - raw html: |
       ${ end_accordion() }
+    show if: defined('court_type')
 
 ---
 reconsider: True
