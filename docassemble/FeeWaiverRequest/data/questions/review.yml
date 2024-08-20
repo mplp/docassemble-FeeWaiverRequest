@@ -383,7 +383,7 @@ review:
 
   - raw html: |
       ${ next_accordion('<h2 class="h5">Household Information</h2>') }
-    show if: unable_to_pay
+    show if: unable_to_pay and defined('household_size')
   - Edit: household_size
     button: |
       **Household size:**
@@ -412,7 +412,7 @@ review:
 
   - raw html: |
       ${ next_accordion('<h2 class="h5">Assets</h2>') }
-    show if: unable_to_pay
+    show if: unable_to_pay and defined('bank_account_balance')
   - Edit: 
     - bank_account_balance
     - recompute:
@@ -474,7 +474,7 @@ review:
 
   - raw html: |
       ${ next_accordion('<h2 class="h5">Payments and Obligations</h2>') }
-    show if: unable_to_pay
+    show if: unable_to_pay and defined('expense_rent_amount')
   - Edit: 
     - expense_rent_amount
     - recompute:
