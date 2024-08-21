@@ -224,13 +224,7 @@ comment: |
   Delete mandatory: True to include in another interview
 mandatory: True
 code: |
-  store_variables_snapshot(
-      key='intro',
-      persistent=True,
-      data={
-          "snap_time": str(current_datetime().format_datetime()),
-          },
-      )  
+  snapshot_start
   #review_screen_prep
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
@@ -244,31 +238,11 @@ code: |
   signature_date
 
   # Store anonymous data for analytics / statistics
-  if case_type == 'Parties':
-    store_variables_snapshot(
-      key='final',
-      persistent=True,
-      data={
-        "zip": users[0].address.zip,
-        "number_of_forms": len(al_court_bundle.enabled_documents()),
-        "snap_time": str(current_datetime().format_datetime()),
-        },
-      )
-  # Same as above, but without the zip code (user address is not collected on this
-  # path - no need to collect it just for stats).
-  else:
-    store_variables_snapshot(
-      key='final',
-      persistent=True,
-      data={
-        "number_of_forms": len(al_court_bundle.enabled_documents()),
-        "snap_time": str(current_datetime().format_datetime()),
-        },
-      )
+  snapshot_download
+  
   set_progress(progress_done)
   fee_waiver_request_download
   set_progress(progress_done)
-
 ---
 id: case type
 question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
