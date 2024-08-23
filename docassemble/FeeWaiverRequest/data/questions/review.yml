@@ -215,7 +215,22 @@ review:
       **In the matter of:**
       ${ in_the_matter_of }
     show if: case_type == 'Matter'
-    
+
+  - raw html: |
+      ${ next_accordion('<h2 class="h5">Your Information</h2>') }
+    show if: case_type == 'Matter'
+  - Edit:
+    - users[0].name.first
+    - users[0].name.middle
+    - users[0].name.last
+    - users[0].name.suffix
+    button: |
+      **Your Name**
+      
+       ${ users[0].name.full() }
+    show if: case_type == 'Matter'
+
+
   - raw html: |
       ${ next_accordion('<h2 class="h5">Parties and Attorneys</h2>') }
     show if: case_type == 'Parties'
