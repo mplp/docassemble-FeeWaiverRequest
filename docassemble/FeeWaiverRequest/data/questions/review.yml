@@ -318,6 +318,19 @@ review:
     show if: defined('pa_received')
   - Edit:
     - pa_received
+    - recompute:
+      - pa_recalc_trigger
+      - pa_ssa_recalc_trigger
+      - pa_mdhhs
+      - recompute_legal_service
+      - pa_other_list
+      - unable_to_pay
+      - assets_list
+      - obligations_list
+    button: |
+      **Public assistance received:**
+      ${ word(yesno(pa_received)) }
+  - Edit:
     - pa_food_assistance_program
     - pa_medicaid
     - pa_family_independence_program
@@ -336,8 +349,7 @@ review:
       - assets_list
       - obligations_list
     button: |
-      **Public assistance received:**
-      ${ word(yesno(pa_received)) }
+      **Types of public assistance received:**
       
       Food Assistance Program (FAP or SNAP): ${ word(yesno(pa_food_assistance_program)) }
       
@@ -356,6 +368,7 @@ review:
       Supplemental Security Income (SSI): ${ word(yesno(pa_supplemental_security)) }
       
       Other means-tested public assistance: ${ word(yesno(pa_other)) }
+    show if: pa_received
   - Edit: pa_mdhhs_case_number
     button: |
       **MDHHS Case #:**
@@ -390,11 +403,12 @@ review:
     button: |
       **Receive legal assistance?**
       ${ word(yesno(legal_service_representation)) }
+    show if: pa_received == False
   - Edit: legal_service_provider
     button: |
       **Name of the legal service provider or law school clinic:**
       ${ legal_service_provider }
-    show if: legal_service_representation == True
+    show if: pa_received == False and legal_service_representation == True
 
   - raw html: |
       ${ next_accordion('<h2 class="h5">Household Information</h2>') }
