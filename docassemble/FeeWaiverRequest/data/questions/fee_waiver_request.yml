@@ -93,6 +93,35 @@ sections:
   - section_final: Final Instructions
   - review_full: "✎ <u>Review / Edit</u>"
 
+# # # # # # # # # # # # # # Main Order # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # Main Order # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # Main Order # # # # # # # # # # # # # # # #
+---
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: True
+code: |
+  snapshot_start
+  #review_screen_prep
+  nav.set_section('review_full') # to ensure this shows from beginning
+  nav.set_section("section_intro")
+  set_progress(progress_intro)
+  MLH_standard_intro_pages
+  interview_order_fee_waiver_request
+  nav.set_section("section_final")
+  set_progress(progress_outro)
+  MLH_form_type = "forms" if insert_pii_form else "form"
+  MLH_standard_outro_pages
+  signature_date
+
+  # Store anonymous data for analytics / statistics
+  snapshot_download
+  
+  set_progress(progress_done)
+  fee_waiver_request_download
+  set_progress(progress_done)
+
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
@@ -217,32 +246,6 @@ code: |
     user_monthly_payments.gather()
   check_for_indigency = True
 
-###################### Main order ######################
----
-comment: |
-  This block includes the logic for standalone interviews.
-  Delete mandatory: True to include in another interview
-mandatory: True
-code: |
-  snapshot_start
-  #review_screen_prep
-  nav.set_section('review_full') # to ensure this shows from beginning
-  nav.set_section("section_intro")
-  set_progress(progress_intro)
-  MLH_standard_intro_pages
-  interview_order_fee_waiver_request
-  nav.set_section("section_final")
-  set_progress(progress_outro)
-  MLH_form_type = "forms" if insert_pii_form else "form"
-  MLH_standard_outro_pages
-  signature_date
-
-  # Store anonymous data for analytics / statistics
-  snapshot_download
-  
-  set_progress(progress_done)
-  fee_waiver_request_download
-  set_progress(progress_done)
 ---
 id: case type
 question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
