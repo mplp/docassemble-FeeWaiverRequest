@@ -534,8 +534,6 @@ fields:
 ---
 id: bank account balance
 question: Bank Account Balance
-subquestion: |
-  unable: ${ unable_to_pay }
 fields:
   - What is the total amount of money in your bank accounts?: bank_account_balance
     label above field: true
