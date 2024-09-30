@@ -36,9 +36,18 @@ code: |
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
-  accessible_instructions_link = "[https://michiganlegalhelp.org/node/2066](https://michiganlegalhelp.org/node/2066)"
-  resource_page_link = "[https://michiganlegalhelp.org/node/10945](https://michiganlegalhelp.org/node/10945)"
-  cover_sheet_select_county = ""
+---
+code: |
+  resource_page_url_only = "https://michiganlegalhelp.org/node/10945"
+  resource_page_name = "Fee Waivers in Court Cases"
+  survey_link_url_only = "https://www.surveymonkey.com/r/WFDJ5RY"
+---
+template: survey_embed_script
+content: |
+  <script>
+    (function(t,e,s,n){var o,a,c;t.SMCX=t.SMCX||[],e.getElementById(n)||(o=e.getElementsByTagName(s),a=o[o.length-1],c=e.createElement(s),c.type="text/javascript",c.async=!0,c.id=n,c.src="https://widget.surveymonkey.com/collect/website/js/tRaiETqnLgj758hTBazgdxQH4LNlYkhHZJyOIp4jpoTszNBGKyIJeHouRp0Q8kg1.js",a.parentNode.insertBefore(c,a));
+    })(window,document,"script","smcx-sdk");
+  </script>
 ---
 code: |
   MLH_multiple_forms = insert_pii_form
@@ -119,7 +128,7 @@ code: |
   snapshot_download
   
   set_progress(progress_done)
-  fee_waiver_request_download
+  MLH_download
   set_progress(progress_done)
 
 # # # # # # # # # # # # # # Interview Order # # # # # # # # # # # # # # # #
@@ -851,23 +860,6 @@ code: |
   addresses_to_search = [user.address for user in users.complete_elements()]
 
 ---
-id: DownloadScreen
-event: fee_waiver_request_download
-question: |
-  All done
-subquestion: |
-  Thank you ${users}. Your form is ready to download and deliver.
-  
-  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
-
-  ${ action_button_html(url_action('review_full'), label='Edit answers', color='info') }
-
-  ${ al_cover_bundle.download_list_html() }
-  ${ al_court_bundle.download_list_html(include_zip=False) }
-  
-  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-
----
 reconsider: True
 code: |
   insert_pii_form = pa_supplemental_security and not (pa_mdhhs or pa_other)
@@ -922,13 +914,10 @@ code: |
 ---
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_cover_bundle: >-
-      ALDocumentBundle.using(elements=[cover_sheet_template], 
-      filename="Instructions", title="Instructions", enabled=True)
   - al_user_bundle: >-
-      ALDocumentBundle.using(elements=[cover_sheet_template, fee_waiver_attachment, 
+      ALDocumentBundle.using(elements=[cover_sheet_template_2, fee_waiver_attachment, 
       protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment],
-      filename="fee_waiver_request_packet", title="All forms to download for your records",
+      filename="fee_waiver_request_packet", title="All forms and instructions",
       enabled=True)
   - al_court_bundle: >-
       ALDocumentBundle.using(elements=[fee_waiver_attachment, protected_pii_mc_97_attachment,
@@ -1171,3 +1160,20 @@ attachment:
       - "form_name": "Fee Waiver Request"
       - "pa_ssa_number": ${ pa_ssa_number }
       - "today": ${ today() }
+---
+attachment:
+  name: cover sheet 2.0
+  variable name: cover_sheet_template_2[i]
+  docx template file: cover_sheet_2.0.docx
+  tagged pdf: True
+  fields:
+      - "cover_sheet_top_message": ${ cover_sheet_top_message }
+      - "cover_sheet_complete_1": ${ cover_sheet_complete_1 }
+      - "cover_sheet_complete_1a": ${ cover_sheet_complete_1a }
+      - "resource_page_link": ${ resource_page_link }
+      - "resource_page_url_only": ${ resource_page_url_only }
+      - "cover_sheet_share": ${ cover_sheet_share }
+      - "cover_sheet_complete_2": ${ cover_sheet_complete_2 }
+      - "cover_sheet_survey_link": ${ cover_sheet_survey_link }
+      - "survey_link_url_only": ${ survey_link_url_only }
+      - "cover_sheet_thanks": ${ cover_sheet_thanks }
