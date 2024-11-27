@@ -44,9 +44,9 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.FeeWaiverRequest',
-      version='1.0.2',
+      version='1.0.3',
       description=('Fee Waiver Request'),
-      long_description='# docassemble.FeeWaiverRequestMc20\r\n\r\nFee Waiver Request\r\n\r\n## Author\r\n* 9/30/24   update cover sheet method and add new user survey 1.0.2\r\n* 8/26/24   small review screen and text fixes 1.0.1\r\n* 8/23/24   Preparing to go live, advance version to 1.0.0\r\nSept 2023   New, from Suffolk Weaver. Brett Harrison of Maverick & Mitchell LLC\r\n\r\n',
+      long_description='# docassemble.FeeWaiverRequestMc20\r\n\r\nFee Waiver Request\r\n\r\n## Author\r\n* 11/27/24  simplify e-filing language; make addresses display flush with left 1.0.3\r\n* 9/30/24   update cover sheet method and add new user survey 1.0.2\r\n* 8/26/24   small review screen and text fixes 1.0.1\r\n* 8/23/24   Preparing to go live, advance version to 1.0.0\r\nSept 2023   New, from Suffolk Weaver. Brett Harrison of Maverick & Mitchell LLC\r\n\r\n',
       long_description_content_type='text/markdown',
       author='Brett Harrison of Maverick & Mitchell LLC',
       author_email='harrison.brett.m@gmail.com',
