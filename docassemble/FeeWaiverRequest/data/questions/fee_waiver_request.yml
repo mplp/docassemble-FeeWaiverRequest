@@ -314,13 +314,16 @@ fields:
 
 ---
 id: matter of
-question: Case Matter
+question: Case Name
 subquestion: |
   The top of your petition or other court forms should say "In the matter of ______."
+
+  Complete the title below to match your court forms.
 fields:
-  - 'Look at your petition and complete the following: the name of my case is "In the matter of ______."': in_the_matter_of
+  - '**In the matter of**': in_the_matter_of
     maxlength: 76
-    label above field: True
+  - note: |
+      Do **not** include "In the matter of" in the box above.
 
 ---
 reconsider: True
