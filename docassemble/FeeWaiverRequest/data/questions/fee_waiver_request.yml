@@ -32,7 +32,6 @@ code: |
   MLH_instructions_included = True
   MLH_court_forms = True
   MLH_esign_supported = True
-  MLH_case_type_language = f"Look for the two-letter case type code at the end of your case number. If you are filing a new case and do not know the case type code yet, you can find it in this { MLH_CASE_TYPE_CODE_LIST }. Also look at the column labeled **Type of Filing**. If this column only says **Subsequent Filings** for your court and you need to file papers to start a case, then you cannot e-file your *Fee Waiver Request*. If you are allowed to e-file your initial papers, this column will say **Case Initiation**. If you need to file a *Fee Waiver Request* with a post-judgment motion, it will be considered a subsequent filing."
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
@@ -959,7 +958,7 @@ code: |
   if case_type == 'Parties' and plaintiffs[0].has_attorney:
     plaintiffs_attorney_name = plaintiff_attorneys[0].name.full()
     plaintiffs_attorney_bar_number = plaintiff_attorneys[0].bar_number
-    plaintiffs_attorney_address_block = plaintiff_attorneys[0].address.block()
+    plaintiffs_attorney_address_block = f"{ plaintiff_attorneys[0].address.line_one() }\n{ plaintiff_attorneys[0].address.line_two() }"
     #plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
     plaintiffs_attorney_phone_number = word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
   else:
@@ -971,7 +970,7 @@ code: |
   if case_type == 'Parties' and defendants[0].has_attorney:
     defendants_attorney_name = defendant_attorneys[0].name.full()
     defendants_attorney_bar_number = defendant_attorneys[0].bar_number
-    defendants_attorney_address_block = defendant_attorneys[0].address.block()
+    defendants_attorney_address_block = f"{ defendant_attorneys[0].address.line_one() }\n{ defendant_attorneys[0].address.line_two() }"
     defendants_attorney_phone_number = word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
   else:
     defendants_attorney_name = ''
@@ -1001,32 +1000,34 @@ attachment:
     - "defendants_name": ${ defendants_name }
     - "plaintiffs_address_and_phone": |
         % if case_type == 'Parties':
-          ${ plaintiffs[0].address.block() }
-          ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+        ${ plaintiffs[0].address.line_one() }
+        ${ plaintiffs[0].address.line_two() }
+        ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
         % else:
-          ${ word('') }
+        ${ word('') }
         % endif
     - "defendants_address_and_phone": |
         % if case_type == 'Parties':
-          ${ defendants[0].address.block() }
-          ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+        ${ defendants[0].address.line_one() }
+        ${ defendants[0].address.line_two() }
+        ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
         % else:
-          ${ word('') }
+        ${ word('') }
         % endif
     
     - "plaintiffs_attorney_name": ${ plaintiffs_attorney_name }
     - "plaintiffs_attorney_bar_number": ${ plaintiffs_attorney_bar_number }
     - "plaintiffs_attorney_address_and_phone": |
         % if case_type == 'Parties' and plaintiffs[0].has_attorney:
-          ${ plaintiffs_attorney_address_block }
-          ${ plaintiffs_attorney_phone_number }
+        ${ plaintiffs_attorney_address_block }
+        ${ plaintiffs_attorney_phone_number }
         % endif
     - "defendants_attorney_name": ${ defendants_attorney_name }
     - "defendants_attorney_bar_number": ${ defendants_attorney_bar_number }
     - "defendants_attorney_address_and_phone": |
         % if case_type == 'Parties' and defendants[0].has_attorney:
-          ${ defendants_attorney_address_block }
-          ${ defendants_attorney_phone_number }
+        ${ defendants_attorney_address_block }
+        ${ defendants_attorney_phone_number }
         % endif
 
     - "pa_received": ${ pa_received }
