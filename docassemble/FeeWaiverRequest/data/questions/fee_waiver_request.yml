@@ -256,15 +256,13 @@ code: |
 
 ---
 id: case type
-question: Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?
-subquestion: |
-  Some cases do not have two parties, such as name change cases or adoption cases.
+question: What type of court case do you have?
 fields:
   - no label: case_type
     input type: radio
     choices:
-      - Yes: Parties
-      - No: Matter
+      - "A case with at least two parties (For example: Smith v. Jones)": Parties
+      - "A case with just one name (For example: In the Matter of Smith)": Matter
 # continue butotn field exists for review functionality
 continue button field: collect_case_type
 
