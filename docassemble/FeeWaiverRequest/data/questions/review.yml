@@ -627,7 +627,7 @@ edit:
   - name.last
   - address.address
   - no_phone_number
-confirm: True
+delete buttons: False
 
 ---
 continue button field: other_parties.revisit
@@ -651,7 +651,7 @@ edit:
   - name.last
   - address.address
   - no_phone_number
-confirm: True
+delete buttons: False
 
 ---
 continue button field: user_vehicles.revisit
