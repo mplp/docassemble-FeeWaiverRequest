@@ -97,7 +97,7 @@ code: |
 sections:
   - section_intro: Introduction
   - section_info: Basic Information
-  - section_affidavit: Affidavit Information
+  - section_affidavit: Fee Waiver Information
   - section_final: Final Instructions
   - review_full: "✎ <u>Review / Edit</u>"
 
