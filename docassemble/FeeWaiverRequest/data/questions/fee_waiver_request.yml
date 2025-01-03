@@ -257,12 +257,15 @@ code: |
 ---
 id: case type
 question: What type of court case do you have?
+subquestion: |
+  Most court cases are called something like "Name v Name". Some court cases have a name like "In the Matter of _____".
 fields:
-  - no label: case_type
+  - My court case is called something like:: case_type
     input type: radio
     choices:
-      - 'A case with at least two parties (For example: Smith v. Jones)': Parties
-      - 'A case that starts with the title "In the Matter of ______" (For example: In the Matter of John Smith)': Matter
+      - '"Name v Name" (For example: "Maria Smith v John Smith")': Parties
+      - '"In the Matter of _____" (For example: "In the Matter of Maria Smith")': Matter
+    label above field: True
 # continue button field exists for review functionality
 continue button field: collect_case_type
 

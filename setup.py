@@ -1,6 +1,6 @@
 import os
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 
@@ -52,8 +52,7 @@ setup(name='docassemble.FeeWaiverRequest',
       author_email='harrison.brett.m@gmail.com',
       license='The MIT License',
       url='https://michiganlegalhelp.org',
-      packages=find_packages(),
-      namespace_packages=['docassemble'],
+      packages=find_namespace_packages(),
       install_requires=['docassemble.AssemblyLine>=3.2.0', 'docassemble.GithubFeedbackForm>=0.4.1.1'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/FeeWaiverRequest/', package='docassemble.FeeWaiverRequest'),
