@@ -261,9 +261,9 @@ fields:
   - no label: case_type
     input type: radio
     choices:
-      - "A case with at least two parties (For example: Smith v. Jones)": Parties
-      - "A case with just one name (For example: In the Matter of Smith)": Matter
-# continue butotn field exists for review functionality
+      - 'A case with at least two parties (For example: Smith v. Jones)': Parties
+      - 'A case that starts with the title "In the Matter of ______" (For example: In the Matter of John Smith)': Matter
+# continue button field exists for review functionality
 continue button field: collect_case_type
 
 ---

@@ -190,7 +190,9 @@ review:
       % if case_type=='Parties':
       A case with at least two parties (For example: Smith v. Jones)
       % else:
-      A case with just one name (Fo example, In the Matter of Smith)
+      A case that starts with the title "In the Matter of _____" 
+      
+      (For example: In the Matter of John Smith)
       % endif
     show if: court_type == 'circuit'
   - Edit:
