@@ -185,8 +185,17 @@ review:
     - recompute:
       - recompute_case_info
     button: |
-      **Does your court case have two parties (Plaintiff/Defendant or Petitioner/Respondent)?**
-      ${ word(yesno(case_type=='Parties')) }
+      **What type of court case do you have?**
+      
+      % if case_type=='Parties':
+      My case is called something like:
+      
+      "Name v Name" (For example: "Maria Smith v John Smith")
+      % else:
+      My case is called something like:
+      
+      "In the Matter of _____" (For example: "In the Matter of Maria Smith")
+      % endif
     show if: court_type == 'circuit'
   - Edit:
     - user_ask_role
@@ -622,7 +631,7 @@ edit:
   - name.last
   - address.address
   - no_phone_number
-confirm: True
+delete buttons: False
 
 ---
 continue button field: other_parties.revisit
@@ -646,7 +655,7 @@ edit:
   - name.last
   - address.address
   - no_phone_number
-confirm: True
+delete buttons: False
 
 ---
 continue button field: user_vehicles.revisit
