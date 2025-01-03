@@ -898,6 +898,7 @@ objects:
   - protected_pii_mc_97a_attachment: >-
       ALDocument.using(title="Protected Personal Identifying Information - MC 97a", 
       filename="Protected Personal Identifying Information - MC 97a", has_addendum=False)
+  - instructions: ALDocument.using(filename="Instructions for Fee Waiver - Do not file this", title="Instructions", enabled=True, has_addendum=False)
 ---
 code: |
   protected_pii_mc_97_attachment.enabled = insert_mc_97
@@ -906,16 +907,10 @@ code: |
   protected_pii_mc_97a_attachment.enabled = insert_mc_97a
 
 ---
-# The fee waiver's instructions are located right on the cover sheet. Override framework.
-code: |
-  cover_sheet_complete_1 = "After you sign and date the Fee Waiver Request, make a copy of it for your records. If your case is a family law matter, make an extra copy for the Friend of the Court. You can ask the court clerk for copies. There may be a fee.\n\n"
-  cover_sheet_complete_1 += "File the original signed form with the court clerk, along with the Friend of the Court copy (if needed). The clerk may be able to waive your fees at that time, or the clerk may send your Fee Waiver Request to a judge to decide."
-
----
 # Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
   - al_user_bundle: >-
-      ALDocumentBundle.using(elements=[cover_sheet_template_2, fee_waiver_attachment, 
+      ALDocumentBundle.using(elements=[instructions, fee_waiver_attachment, 
       protected_pii_mc_97_attachment, protected_pii_mc_97a_attachment],
       filename="fee_waiver_request_packet", title="All forms and instructions",
       enabled=True)
@@ -1164,18 +1159,7 @@ attachment:
       - "today": ${ today() }
 ---
 attachment:
-  name: cover sheet 2.0
-  variable name: cover_sheet_template_2[i]
-  docx template file: cover_sheet_2.0.docx
+  name: instructions
+  variable name: instructions[i]        
+  docx template file: fee_waiver_instructions.docx
   tagged pdf: True
-  fields:
-      - "cover_sheet_top_message": ${ cover_sheet_top_message }
-      - "cover_sheet_complete_1": ${ cover_sheet_complete_1 }
-      - "cover_sheet_complete_1a": ${ cover_sheet_complete_1a }
-      - "resource_page_link": ${ resource_page_link }
-      - "resource_page_url_only": ${ resource_page_url_only }
-      - "cover_sheet_share": ${ cover_sheet_share }
-      - "cover_sheet_complete_2": ${ cover_sheet_complete_2 }
-      - "cover_sheet_survey_link": ${ cover_sheet_survey_link }
-      - "survey_link_url_only": ${ survey_link_url_only }
-      - "cover_sheet_thanks": ${ cover_sheet_thanks }
