@@ -3,6 +3,7 @@
 Fee Waiver Request
 
 ## Author
+* 2/14/25   adjust logic to accommodate 2nd Ottawa circ court; add message if no phone
 * 1/6/25    Add instructions; update language
 * 11/27/24  simplify e-filing language; make addresses display flush with left 1.0.3; language tweaks
 * 9/30/24   update cover sheet method and add new user survey 1.0.2
