@@ -37,6 +37,9 @@ code: |
   MLH_time_max = 15
 ---
 code: |
+  filing_court = "any_narrowed_by_type"
+---
+code: |
   resource_page_url_only = "https://michiganlegalhelp.org/node/10945"
   resource_page_name = "Fee Waivers in Court Cases"
   survey_link_url_only = "https://www.surveymonkey.com/r/WFDJ5RY"
@@ -145,11 +148,7 @@ code: |
   users[0].name.first
   court_type_selection
   county_choice
-  if court_count > 1:
-    court_index = court_index_for_specific_court_type
-  else:
-  # This means there is only one court of this type for this county.
-    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  court_count
   the_court
 
   if court_type == 'circuit':
@@ -989,8 +988,10 @@ attachment:
     - "trial_court_circuit": ${ trial_court_circuit }
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
-    - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-    - "trial_court_phone_number": ${ the_court.phone }
+    - "trial_court_address_on_one_line": |
+          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+    - "trial_court_phone_number": |
+          ${ '' if unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1091,8 +1092,10 @@ attachment:
     - "trial_court_circuit": ${ trial_court_circuit }
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
-    - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-    - "trial_court_phone_number": ${ the_court.phone }
+    - "trial_court_address_on_one_line": |
+          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+    - "trial_court_phone_number": |
+          ${ '' if unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1126,8 +1129,10 @@ attachment:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
-      - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-      - "trial_court_phone_number": ${ the_court.phone }
+      - "trial_court_address_on_one_line": |
+          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+      - "trial_court_phone_number": |
+          ${ '' if unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
@@ -1149,8 +1154,10 @@ attachment:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
-      - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-      - "trial_court_phone_number": ${ the_court.phone }
+      - "trial_court_address_on_one_line": |
+          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+      - "trial_court_phone_number": |
+          ${ '' if unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
