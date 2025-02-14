@@ -958,7 +958,7 @@ code: |
     plaintiffs_attorney_bar_number = plaintiff_attorneys[0].bar_number
     plaintiffs_attorney_address_block = f"{ plaintiff_attorneys[0].address.line_one() }\n{ plaintiff_attorneys[0].address.line_two() }"
     #plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
-    plaintiffs_attorney_phone_number = word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
+    plaintiffs_attorney_phone_number = word("Unknown phone") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
   else:
     plaintiffs_attorney_name = ''
     plaintiffs_attorney_bar_number = ''
@@ -969,7 +969,7 @@ code: |
     defendants_attorney_name = defendant_attorneys[0].name.full()
     defendants_attorney_bar_number = defendant_attorneys[0].bar_number
     defendants_attorney_address_block = f"{ defendant_attorneys[0].address.line_one() }\n{ defendant_attorneys[0].address.line_two() }"
-    defendants_attorney_phone_number = word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
+    defendants_attorney_phone_number = word("Unknown phone") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
   else:
     defendants_attorney_name = ''
     defendants_attorney_bar_number = ''
@@ -1002,7 +1002,7 @@ attachment:
         % if case_type == 'Parties':
         ${ plaintiffs[0].address.line_one() }
         ${ plaintiffs[0].address.line_two() }
-        ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+        ${ word("No phone") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
         % else:
         ${ word('') }
         % endif
@@ -1010,7 +1010,7 @@ attachment:
         % if case_type == 'Parties':
         ${ defendants[0].address.line_one() }
         ${ defendants[0].address.line_two() }
-        ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+        ${ word("Unknown phone") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
         % else:
         ${ word('') }
         % endif
