@@ -989,9 +989,9 @@ attachment:
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
     - "trial_court_address_on_one_line": |
-          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
     - "trial_court_phone_number": |
-          ${ '' if unknown_circuit_location else the_court.phone }
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1093,9 +1093,9 @@ attachment:
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
     - "trial_court_address_on_one_line": |
-          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
     - "trial_court_phone_number": |
-          ${ '' if unknown_circuit_location else the_court.phone }
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1130,9 +1130,9 @@ attachment:
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
       - "trial_court_address_on_one_line": |
-          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
       - "trial_court_phone_number": |
-          ${ '' if unknown_circuit_location else the_court.phone }
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
@@ -1155,9 +1155,9 @@ attachment:
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
       - "trial_court_address_on_one_line": |
-          ${ '' if unknown_circuit_location else the_court.address.on_one_line() }
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
       - "trial_court_phone_number": |
-          ${ '' if unknown_circuit_location else the_court.phone }
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
