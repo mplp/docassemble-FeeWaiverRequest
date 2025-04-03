@@ -37,6 +37,9 @@ code: |
   MLH_time_max = 15
 ---
 code: |
+  filing_court = "any_narrowed_by_type"
+---
+code: |
   resource_page_url_only = "https://michiganlegalhelp.org/node/10945"
   resource_page_name = "Fee Waivers in Court Cases"
   survey_link_url_only = "https://www.surveymonkey.com/r/WFDJ5RY"
@@ -145,19 +148,10 @@ code: |
   users[0].name.first
   court_type_selection
   county_choice
-  if court_count > 1:
-    court_index = court_index_for_specific_court_type
-  else:
-  # This means there is only one court of this type for this county.
-    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
+  court_count
   the_court
 
-  if court_type == 'circuit':
-    case_type
-  elif court_type == 'district':
-    case_type = 'Parties'
-  elif court_type == 'probate':
-    case_type = 'Matter'
+  case_type
 
   set_progress(progress_user)
   if case_type == 'Parties':
@@ -255,6 +249,7 @@ code: |
   check_for_indigency = True
 
 ---
+if: court_type == 'circuit'
 id: case type
 question: What type of court case do you have?
 subquestion: |
@@ -268,7 +263,12 @@ fields:
     label above field: True
 # continue button field exists for review functionality
 continue button field: collect_case_type
-
+---
+code: |
+  if court_type == 'district':
+    case_type = 'Parties'
+  elif court_type == 'probate':
+    case_type = 'Matter'
 ---
 id: user role
 question: |
@@ -299,7 +299,6 @@ code: |
     other_parties.there_are_any = True
   else:
     other_parties.there_are_any = False
-
 ---
 id: docket number
 question: What is the case number?
@@ -959,7 +958,7 @@ code: |
     plaintiffs_attorney_bar_number = plaintiff_attorneys[0].bar_number
     plaintiffs_attorney_address_block = f"{ plaintiff_attorneys[0].address.line_one() }\n{ plaintiff_attorneys[0].address.line_two() }"
     #plaintiffs_attorney_phone_number = phone_number_formatted(plaintiff_attorneys[0].phone_number)
-    plaintiffs_attorney_phone_number = word("") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
+    plaintiffs_attorney_phone_number = word("Unknown phone") if plaintiff_attorneys[0].no_phone_number else plaintiff_attorneys[0].phone_numbers()
   else:
     plaintiffs_attorney_name = ''
     plaintiffs_attorney_bar_number = ''
@@ -970,7 +969,7 @@ code: |
     defendants_attorney_name = defendant_attorneys[0].name.full()
     defendants_attorney_bar_number = defendant_attorneys[0].bar_number
     defendants_attorney_address_block = f"{ defendant_attorneys[0].address.line_one() }\n{ defendant_attorneys[0].address.line_two() }"
-    defendants_attorney_phone_number = word("") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
+    defendants_attorney_phone_number = word("Unknown phone") if defendant_attorneys[0].no_phone_number else defendant_attorneys[0].phone_numbers()
   else:
     defendants_attorney_name = ''
     defendants_attorney_bar_number = ''
@@ -989,8 +988,10 @@ attachment:
     - "trial_court_circuit": ${ trial_court_circuit }
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
-    - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-    - "trial_court_phone_number": ${ the_court.phone }
+    - "trial_court_address_on_one_line": |
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
+    - "trial_court_phone_number": |
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1001,7 +1002,7 @@ attachment:
         % if case_type == 'Parties':
         ${ plaintiffs[0].address.line_one() }
         ${ plaintiffs[0].address.line_two() }
-        ${ word("") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
+        ${ word("No phone") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
         % else:
         ${ word('') }
         % endif
@@ -1009,7 +1010,7 @@ attachment:
         % if case_type == 'Parties':
         ${ defendants[0].address.line_one() }
         ${ defendants[0].address.line_two() }
-        ${ word("") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
+        ${ word("Unknown phone") if defendants[0].no_phone_number else defendants[0].phone_numbers() }
         % else:
         ${ word('') }
         % endif
@@ -1091,8 +1092,10 @@ attachment:
     - "trial_court_circuit": ${ trial_court_circuit }
     - "trial_court_district": ${ trial_court_district }
     - "trial_court_county": ${ trial_court_county }
-    - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-    - "trial_court_phone_number": ${ the_court.phone }
+    - "trial_court_address_on_one_line": |
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
+    - "trial_court_phone_number": |
+        ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
     - "docket_number": ${ docket_number }
     - "in_the_matter_of": |
         ${ in_the_matter_of if case_type == 'Matter' else '' }
@@ -1126,8 +1129,10 @@ attachment:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
-      - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-      - "trial_court_phone_number": ${ the_court.phone }
+      - "trial_court_address_on_one_line": |
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
+      - "trial_court_phone_number": |
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }
@@ -1149,8 +1154,10 @@ attachment:
       - "trial_court_circuit": ${ trial_court_circuit }
       - "trial_court_district": ${ trial_court_district }
       - "county_choice": ${ county_choice.upper() if court_type == 'probate' else ''}
-      - "trial_court_address_on_one_line": ${ the_court.address.on_one_line() }
-      - "trial_court_phone_number": ${ the_court.phone }
+      - "trial_court_address_on_one_line": |
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.address.on_one_line() }
+      - "trial_court_phone_number": |
+          ${ '' if court_type == "circuit" and court_count > 1 and unknown_circuit_location else the_court.phone }
       - "docket_number": ${ docket_number }
       - "trial_court_judge": ${ trial_court_judge }
       - "plaintiffs_name": ${ plaintiffs_name }

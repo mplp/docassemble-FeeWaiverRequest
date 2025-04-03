@@ -152,10 +152,13 @@ review:
     - court_type
     - county_choice
     - recompute:
-      - the_court
-      - recompute_court
-      - court_index
       - court_count
+    - follow up:
+      - ottawa_circuit_location
+      - specific_court_location
+    - recompute:
+      - court_index
+      - the_court
       - recompute_court_type
     button: |
       **Court Information**
@@ -169,17 +172,19 @@ review:
       % endif
 
       ${ the_court.address.on_one_line() }
-  - Edit:
-    - court_index_for_specific_court_type
-    - recompute:
-      - the_court
-      - court_index
-      - court_count
-    button: |
-      **${ county_choice } ${ the_court.type.capitalize() } Court Location:**
+
+      % if court_count > 1 and court_type == 'circuit' or court_type == 'district':
       
+      **${ county_choice } ${ the_court.type.capitalize() } Court Location:**
+
+      % if court_type == 'circuit' and unknown_circuit_location:
+      I don't know which Circuit Court location applies to my case.
+      % elif court_type == 'circuit' and not unknown_circuit_location:
+      ${ the_court.name }, ${ the_court.address.city } location
+      % elif court_type == 'district':      
       ${ the_court.number } (${ the_court.name })
-    show if: court_count > 1
+      % endif
+      % endif
   - Edit: 
     - case_type
     - recompute:
@@ -598,16 +603,6 @@ review:
   - raw html: |
       ${ end_accordion() }
     show if: defined('court_type')
-
----
-reconsider: True
-code: |
-  if court_count > 1:
-    court_index = court_index_for_specific_court_type
-  else:
-    # This means there is only one court of this type for this county.
-    court_index = list(court_list.filter_courts_by_2([county_choice], [court_type], column_1='address_county', column_2='type'))[0][0]
-  recompute_court = True
 
 ---
 continue button field: users.revisit
