@@ -50,11 +50,10 @@ setup(name='docassemble.FeeWaiverRequest',
       long_description_content_type='text/markdown',
       author='Brett Harrison of Maverick & Mitchell LLC',
       author_email='harrison.brett.m@gmail.com',
-      license='The MIT License',
+      license='MIT',
       url='https://michiganlegalhelp.org',
       packages=find_namespace_packages(),
-      install_requires=['docassemble.AssemblyLine>=3.2.0', 'docassemble.GithubFeedbackForm>=0.4.1.1'],
+      install_requires=['docassemble.AssemblyLine @ git+https://github.com/SuffolkLITLab/docassemble-AssemblyLine.git@main', 'docassemble.GithubFeedbackForm @ git+https://github.com/SuffolkLITLab/docassemble-GithubFeedbackForm.git@main'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/FeeWaiverRequest/', package='docassemble.FeeWaiverRequest'),
      )
-
