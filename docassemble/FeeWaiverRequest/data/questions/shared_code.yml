@@ -122,7 +122,7 @@ code: |
 objects:
   - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
-      filename="Fee Waiver Request - MC 20", enabled=True, has_addendum=True,
+      filename="Fee Waiver Request - MC 20", enabled=True, has_addendum=True if tool_ID == "fee_waiver" else False,
       default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
   - protected_pii_mc_97a_attachment: >-
       ALDocument.using(title="Protected Personal Identifying Information - MC 97a", 
@@ -308,15 +308,11 @@ attachment:
     - "plaintiffs_name": ${ plaintiffs_name }
     - "defendants_name": ${ defendants_name }
     - "overflow": |
-        % if tool_ID == "fee_waiver":
         % for field in fee_waiver_attachment.overflow():
         ${ field.label }
         ${ indent(field.overflow_value(overflow_message=fee_waiver_attachment.default_overflow_message)) }
         
         % endfor
-        % else:
-        ""
-        % endif
 
 ---
 attachment:
