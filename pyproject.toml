@@ -1,8 +1,3 @@
-license = "MIT"
-license-files = [
-    "LICENSE",
-]
-
 [build-system]
 requires = [
     "setuptools==80.9.0",
@@ -11,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docassemble.FeeWaiverRequest"
-version = "1.1.1"
+version = "1.2.0"
 description = "Fee Waiver Request"
 readme = "README.md"
 authors = [
