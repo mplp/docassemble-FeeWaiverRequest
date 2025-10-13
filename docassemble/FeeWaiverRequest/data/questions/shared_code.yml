@@ -314,16 +314,9 @@ attachment:
         ${ indent(field.overflow_value(overflow_message=fee_waiver_attachment.default_overflow_message)) }
         
         % endfor
+        % else:
+        ""
         % endif
----
-code: |
-  fee_waiver_attachment.overflow_fields["assets_list"]._original_value = assets_list
-  fee_waiver_attachment.overflow_fields["assets_list"].overflow_trigger = 200
-  fee_waiver_attachment.overflow_fields["assets_list"].label = "Assets list (continued from 3)"
-  fee_waiver_attachment.overflow_fields["obligations_list"]._original_value = obligations_list
-  fee_waiver_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
-  fee_waiver_attachment.overflow_fields["obligations_list"].label = "Obligations list (continued from 3)"
-  fee_waiver_attachment.overflow_fields.gathered = True
 
 ---
 attachment:

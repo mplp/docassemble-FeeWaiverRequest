@@ -797,6 +797,15 @@ objects:
 
 #### for additional objects and attachments see shared_code.yml
 ---
+code: |
+  fee_waiver_attachment.overflow_fields["assets_list"]._original_value = assets_list
+  fee_waiver_attachment.overflow_fields["assets_list"].overflow_trigger = 200
+  fee_waiver_attachment.overflow_fields["assets_list"].label = "Assets list (continued from 3)"
+  fee_waiver_attachment.overflow_fields["obligations_list"]._original_value = obligations_list
+  fee_waiver_attachment.overflow_fields["obligations_list"].overflow_trigger = 85
+  fee_waiver_attachment.overflow_fields["obligations_list"].label = "Obligations list (continued from 3)"
+  fee_waiver_attachment.overflow_fields.gathered = True
+---
 attachment:
   name: protected pii MC 97
   variable name: protected_pii_mc_97_attachment[i]
