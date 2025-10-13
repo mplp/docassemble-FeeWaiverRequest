@@ -36,6 +36,7 @@ code: |
   MLH_form_type = "form"
   MLH_time_min = 5
   MLH_time_max = 15
+  tool_ID = "fee_waiver"
 ---
 code: |
   filing_court = "any_narrowed_by_type"

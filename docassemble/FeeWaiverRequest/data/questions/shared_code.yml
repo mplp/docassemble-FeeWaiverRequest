@@ -308,12 +308,13 @@ attachment:
     - "plaintiffs_name": ${ plaintiffs_name }
     - "defendants_name": ${ defendants_name }
     - "overflow": |
+        % if tool_ID == "fee_waiver":
         % for field in fee_waiver_attachment.overflow():
         ${ field.label }
         ${ indent(field.overflow_value(overflow_message=fee_waiver_attachment.default_overflow_message)) }
         
         % endfor
-
+        % endif
 ---
 code: |
   fee_waiver_attachment.overflow_fields["assets_list"]._original_value = assets_list
