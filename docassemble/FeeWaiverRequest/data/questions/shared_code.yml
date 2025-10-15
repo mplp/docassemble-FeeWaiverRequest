@@ -151,6 +151,10 @@ code: |
   trial_court_phone_number = the_court.phone
   
   trial_court_judge = ''  # As of March 2024, not implemented (per A2J tool)
+
+  if tool_ID in ["divorce_complaint", "custody_complaint"]:
+    case_type = "Parties"
+    
   
   if case_type == 'Matter':
     plaintiffs_name = "N/A"
