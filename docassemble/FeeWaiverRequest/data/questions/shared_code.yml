@@ -122,11 +122,16 @@ code: |
 objects:
   - fee_waiver_attachment: >-
       ALDocument.using(title="Fee Waiver Request - MC 20", 
-      filename="Fee Waiver Request - MC 20", enabled=True, has_addendum=True if tool_ID == "fee_waiver" else False,
+      filename="Fee Waiver Request - MC 20", has_addendum=True if tool_ID == "fee_waiver" else False,
       default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
   - protected_pii_mc_97a_attachment: >-
       ALDocument.using(title="Protected Personal Identifying Information - MC 97a", 
       filename="Protected Personal Identifying Information - MC 97a", has_addendum=False)
+---
+# for divorce/custody complaints, enabling handled in divorce/custody package
+if: tool_ID == "fee_waiver"
+code: |
+  fee_waiver_attachment.enabled = True
 ---
 # Just a little block to set some PDF variables in one place that will be used
 # over multiple attachments
