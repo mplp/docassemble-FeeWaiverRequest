@@ -155,6 +155,7 @@ code: |
   if tool_ID in ["divorce_complaint", "custody_complaint"]:
     case_type = "Parties"
     users[0].has_attorney = False
+    other_parties[0].has_attorney = False
   
   if case_type == 'Matter':
     plaintiffs_name = "N/A"
