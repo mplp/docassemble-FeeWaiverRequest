@@ -252,6 +252,7 @@ code: |
 
 ---
 if: court_type == 'circuit'
+sets: case_type
 id: case type
 question: What type of court case do you have?
 subquestion: |
