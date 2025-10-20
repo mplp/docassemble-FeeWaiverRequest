@@ -342,31 +342,6 @@ fields:
   - no label: pa_received
     datatype: yesnoradio
 ---
-id: public assistance types
-question: |
-  Public Assistance Received
-subquestion: |
-  Which type(s) of public assistance do you receive? *Check all boxes that apply.*
-fields:
-  - "Food Assistance Program through the state of Michigan (also known as FAP or SNAP)": pa_food_assistance_program
-    datatype: yesno
-  - "Medicaid (including Healthy Michigan, CHIP, and ESO)": pa_medicaid
-    datatype: yesno
-  - "Family Independence Program through the state of Michigan (also known as FIP or TANF)": pa_family_independence_program
-    datatype: yesno
-  - "Women, Infants, and Children benefits (WIC)": pa_women_infants_children
-    datatype: yesno
-  - "State Disability Assistance (SDA)": pa_state_disability
-    datatype: yesno
-  - "State Emergency Relief (SER)": pa_state_emergency_relief
-    datatype: yesno
-  - "Refugee Assistance Program (RAP)": pa_refugee_assistance
-    datatype: yesno
-  - "Supplemental Security Income through the federal government (SSI)": pa_supplemental_security
-    datatype: yesno
-  - "Other means-tested public assistance": pa_other
-    datatype: yesno
----
 id: public assistance other
 question: Other Public Assistance
 subquestion: |
