@@ -3,7 +3,7 @@
 Fee Waiver Request
 
 ## Author
-* 10/13/25  Updates to make code compatible with Divorce/Custody suite 1.2.0
+* 10/20/25  Make code compatible with Divorce/Custody suite 1.2.0
 * 4/3/25    adjust logic to accommodate 2nd Ottawa circ court; add message if no phone 1.1.1
 * 1/6/25    Add instructions; update language 1.1.0
 * 11/27/24  simplify e-filing language; make addresses display flush with left 1.0.3; language tweaks
