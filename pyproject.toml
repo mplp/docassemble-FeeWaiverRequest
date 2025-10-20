@@ -1,0 +1,26 @@
+[build-system]
+requires = [
+    "setuptools==80.9.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docassemble.FeeWaiverRequest"
+version = "1.2.0"
+description = "Fee Waiver Request"
+readme = "README.md"
+authors = [
+    { name = "Brett Harrison of Maverick & Mitchell LLC", email = "harrison.brett.m@gmail.com" },
+]
+dependencies = [
+    "docassemble.AssemblyLine @ git+https://github.com/SuffolkLITLab/docassemble-AssemblyLine.git@main",
+    "docassemble.GithubFeedbackForm @ git+https://github.com/SuffolkLITLab/docassemble-GithubFeedbackForm.git@main",
+]
+
+[project.urls]
+Homepage = "https://michiganlegalhelp.org"
+
+[tool.setuptools.packages.find]
+where = [
+    ".",
+]
