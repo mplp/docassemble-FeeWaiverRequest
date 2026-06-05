@@ -68,9 +68,8 @@ objects:
 ---
 features:
   progress bar: True
-  #progress bar method: stepped
-  #progress bar multiplier: 0.02
-  #show progress bar percentage: True
+  javascript:
+    - survey_monkey_script.js
 ---
 mandatory: True
 code: |
