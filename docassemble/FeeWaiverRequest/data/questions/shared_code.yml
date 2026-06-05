@@ -127,7 +127,16 @@ question: SSA Public Assistance
 subquestion: |
   Enter your Social Security Administration (SSA) case number here.
 
-  SSA case numbers usually use your Social Security number (SSN), so your forms will include a *Protected Personal Identifying Information* form that you will file along with your *Fee Waiver Request* form.
+  SSA case numbers usually use your Social Security number (SSN).
+  % if tool_ID in ["divorce_answer", "custody_answer"]:
+  It's OK to enter here because the case number will only go on a **nonpublic** form (FOC 23).
+  % elif tool_ID == "custody_complaint":
+  The case number will be placed on a special *Protected Personal Identifying Information* form that you will file along with your *Fee Waiver Request* form. The case number will also go on form FOC 23, which is a **nonpublic** form.
+  % elif tool_ID == "divorce_complaint":
+  The case number will be placed on a special *Protected Personal Identifying Information* form that you will file along with your *Fee Waiver Request* form. In some cases, the number may also go on form FOC 23, which is a **nonpublic** form.
+  % elif tool_ID == "fee_waiver":
+  The case number will be placed on a special *Protected Personal Identifying Information* form that you will file along with your *Fee Waiver Request* form.
+  % endif
 fields:
   - 'SSA Case #': pa_ssa_number
 
