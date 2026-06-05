@@ -39,6 +39,9 @@ fields:
     datatype: yesno
   - "Other means-tested public assistance": pa_other
     datatype: yesno
+validation code: |
+  if not (pa_food_assistance_program or pa_medicaid or pa_family_independence_program or pa_women_infants_children or pa_state_disability or pa_state_emergency_relief or pa_refugee_assistance or pa_supplemental_security or pa_other):
+    validation_error("You must select at least one type of public assistance. Please go back and change your answers if do not get public assistance.")
 ---
 depends on: pa_received
 code: |
