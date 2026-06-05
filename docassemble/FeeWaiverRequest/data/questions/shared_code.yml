@@ -255,6 +255,9 @@ attachment:
     - "defendants_name": ${ defendants_name }
     - "plaintiffs_address_and_phone": |
         % if case_type == 'Parties':
+        % if tool_ID in ["divorce_complaint", "custody_complaint"] and user_ask_role == "plaintiff" and confidential_contact_info_yn:
+        Confidential/alternative address:
+        % endif
         ${ plaintiffs[0].address.line_one() }
         ${ plaintiffs[0].address.line_two() }
         ${ word("No phone") if plaintiffs[0].no_phone_number else plaintiffs[0].phone_numbers() }
