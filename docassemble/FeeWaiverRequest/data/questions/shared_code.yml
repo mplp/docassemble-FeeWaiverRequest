@@ -11,11 +11,11 @@ subject: |
 content: |
   This may include help such as SNAP or food stamps, Medicaid, TANF, WIC, cash assistance, child care assistance, or SSI (Supplemental Security Income).
   
-  **Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income, so if that is the **only** benefit 
+  **Note:** Social Security Disability Insurance benefits (SSDI) are **not** based on having low income, so if that is the **only**
   % if tool_ID == "fee_waiver":
-  received, select **No.**
+  benefit you receive, select **No.**
   % else:
-  select **Neither.**
+  benefit, select **Neither.**
   % endif
 # in the divorce/custody tools, this help text can apply to user or OP.
 ---
