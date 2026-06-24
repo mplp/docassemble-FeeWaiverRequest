@@ -68,9 +68,8 @@ objects:
 ---
 features:
   progress bar: True
-  #progress bar method: stepped
-  #progress bar multiplier: 0.02
-  #show progress bar percentage: True
+  javascript:
+    - survey_monkey_script.js
 ---
 mandatory: True
 code: |
@@ -119,6 +118,7 @@ code: |
   nav.set_section('review_full') # to ensure this shows from beginning
   nav.set_section("section_intro")
   set_progress(progress_intro)
+  tool_ID
   MLH_standard_intro_pages
   interview_order_fee_waiver_request
   nav.set_section("section_final")
@@ -249,6 +249,11 @@ code: |
     user_monthly_payments.gather()
   check_for_indigency = True
 
+---
+# because code is shared with divorce/custody tools
+id: tool_ID
+code: |
+  tool_ID = "fee_waiver"
 ---
 if: court_type == 'circuit'
 sets: case_type

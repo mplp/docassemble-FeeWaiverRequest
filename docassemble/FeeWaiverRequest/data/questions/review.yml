@@ -146,7 +146,7 @@ review:
       ${ review_empty_explainer }
       % endif
   - raw html: |
-      ${ start_accordion('<h2 class="h5">Case and Court Information</h2>') }
+      ${ start_accordion('<h2>Case and Court Information</h2>') }
     show if: defined('court_type')
   - Edit: 
     - court_type
@@ -231,7 +231,7 @@ review:
     show if: case_type == 'Matter'
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Your Information</h2>') }
+      ${ next_accordion('<h2>Your Information</h2>') }
     show if: case_type == 'Matter'
   - Edit:
     - users[0].name.first
@@ -246,7 +246,7 @@ review:
 
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Parties and Attorneys</h2>') }
+      ${ next_accordion('<h2>Parties and Attorneys</h2>') }
     show if: case_type == 'Parties'
   - Edit: users.revisit
     button: |
@@ -328,7 +328,7 @@ review:
     show if: case_type == 'Parties' and defendants[0].has_attorney
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Public Assistance</h2>') }
+      ${ next_accordion('<h2>Public Assistance</h2>') }
     show if: defined('pa_received')
   - Edit:
     - pa_received
@@ -405,7 +405,7 @@ review:
     show if: pa_supplemental_security == True and pa_mdhhs != True
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Legal Service Representation</h2>') }
+      ${ next_accordion('<h2>Legal Service Representation</h2>') }
     show if: pa_received == False
   - Edit: 
     - legal_service_representation
@@ -425,7 +425,7 @@ review:
     show if: pa_received == False and legal_service_representation == True
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Household Information</h2>') }
+      ${ next_accordion('<h2>Household Information</h2>') }
     show if: unable_to_pay and defined('household_size')
   - Edit: household_size
     button: |
@@ -454,7 +454,7 @@ review:
     show if: unable_to_pay
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Assets</h2>') }
+      ${ next_accordion('<h2>Assets</h2>') }
     show if: unable_to_pay and defined('bank_account_balance')
   - Edit: 
     - bank_account_balance
@@ -516,7 +516,7 @@ review:
     show if: unable_to_pay and user_assets.there_are_any
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Payments and Obligations</h2>') }
+      ${ next_accordion('<h2>Payments and Obligations</h2>') }
     show if: unable_to_pay and defined('expense_rent_amount')
   - Edit: 
     - expense_rent_amount
@@ -594,7 +594,7 @@ review:
     show if: unable_to_pay and user_monthly_payments.there_are_any
 
   - raw html: |
-      ${ next_accordion('<h2 class="h5">Electronic Signature</h2>') }
+      ${ next_accordion('<h2>Electronic Signature</h2>') }
     show if: defined('MLH_esign')
   - Edit: MLH_esign
     button: |
