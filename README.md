@@ -3,9 +3,6 @@
 Fee Waiver Request
 
 ## Author
-Brett Harrison of Maverick & Mitchell LLC
-## Change log
-* 7/31/26   Remove "reconsider" on block to address exceptions in divorce tools; minor styling change on cover letter
 * 6/5/26    Update MC20; headings style change; prep for new embedded survey method; close loophole that allowed no public assistance selection; add code for confidential address tag for divorce/custody interviews; fix help language for divorce/custody interviews 1.2.2
 * 12/12/25  Update embed code; update formatting on instructions 1.2.1
 * 10/20/25  Make code compatible with Divorce/Custody suite 1.2.0

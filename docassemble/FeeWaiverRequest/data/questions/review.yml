@@ -362,7 +362,6 @@ review:
       - unable_to_pay
       - assets_list
       - obligations_list
-      - insert_pii_form
     button: |
       **Types of public assistance received:**
       
