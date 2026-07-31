@@ -156,7 +156,6 @@ code: |
   signature_fields = ['users[0].signature']
 
 ---
-reconsider: True
 code: |
   insert_pii_form = pa_supplemental_security and not (pa_mdhhs or pa_other)
   #VALUE(PA SSI TF) AND !(DHS public assistance received CO OR VALUE(PA other TF))
